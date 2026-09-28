@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Huddle</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: var(--tg-theme-bg-color, #111114);
+      --text: var(--tg-theme-text-color, #f2f2f2);
+      --hint: var(--tg-theme-hint-color, #9a9aa0);
+      --card: var(--tg-theme-secondary-bg-color, #1c1c21);
+      --accent: var(--tg-theme-button-color, #c0392b);
+      --accent-text: var(--tg-theme-button-text-color, #ffffff);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 26px; margin-bottom: 8px; }
+    .hint { color: var(--hint); font-size: 15px; margin-bottom: 24px; }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+    .card h2 { font-size: 18px; margin-bottom: 6px; }
+    .card p { color: var(--hint); font-size: 14px; line-height: 1.4; }
+    .tag {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--accent-text);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="hello">Привет!</h1>
+  <p class="hint">Huddle — игры для своих. Это первая версия приложения: если ты это видишь, всё работает.</p>
+
+  <div class="card">
+    <span class="tag">Дело №1</span>
+    <h2>Тихая ночь</h2>
+    <p>Северогорск, 1 января. Артёма находят замёрзшим на террасе. Полиция говорит — несчастный случай. Его сестра так не думает.</p>
+  </div>
+
+  <div class="card">
+    <span class="tag">Скоро</span>
+    <h2>Вопросы и игры</h2>
+    <p>Наборы вопросов для пар и друзей, «Кто из нас…», «Тайный Санта».</p>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // Приветствуем по имени, если приложение открыто из Telegram
+    const user = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if (user && user.first_name) {
+      document.getElementById('hello').textContent = 'Привет, ' + user.first_name + '!';
+    }
+
+    // Главная кнопка внизу экрана
+    tg.MainButton.setText('Открыть дело');
+    tg.MainButton.show();
+    tg.MainButton.onClick(() => {
+      tg.showAlert('Скоро здесь откроется папка дела 🔍');
+    });
+  </script>
+</body>
+</html>
