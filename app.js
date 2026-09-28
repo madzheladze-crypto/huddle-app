@@ -281,7 +281,7 @@
       var last = layer === g.layers.length - 1;
       if (i >= cards.length) {
         box.innerHTML = '<div class="card"><p class="big">' +
-          (last ? "Вы на самом дне. Это было честно 🤍" : "Слой пройден. Готовы нырнуть?") + "</p></div>" +
+          (last ? "Вы дошли до самой глубины. Теперь вы знаете друг друга чуть лучше 🤍" : "Слой пройден. Готовы нырнуть?") + "</p></div>" +
           (last ? '<button class="btn" data-up>Всплыть на верхушку</button>'
                 : '<button class="btn" data-dive>Нырнуть: ' + esc(g.layers[layer + 1].name) + "</button>") +
           (layer > 0 ? '<button class="btn ghost" data-rise>Всплыть на слой выше</button>' : "") +
