@@ -1,0 +1,507 @@
+(function () {
+  "use strict";
+
+  var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  var app = document.getElementById("app");
+  var stack = [];
+  var timers = [];
+
+  // ---------- утилиты ----------
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function haptic(kind) {
+    try {
+      if (!tg || !tg.HapticFeedback) return;
+      if (kind === "success" || kind === "warning") tg.HapticFeedback.notificationOccurred(kind);
+      else tg.HapticFeedback.impactOccurred(kind || "light");
+    } catch (e) { /* не в Telegram */ }
+  }
+  function clearTimers() {
+    timers.forEach(function (t) { clearInterval(t); clearTimeout(t); });
+    timers = [];
+  }
+  function store(key, val) {
+    try {
+      if (val === undefined) return JSON.parse(localStorage.getItem("huddle:" + key));
+      localStorage.setItem("huddle:" + key, JSON.stringify(val));
+    } catch (e) { return null; }
+  }
+
+  // ---------- игроки ----------
+  var players = store("players") || [];
+  var tgName = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "";
+  if (!players.length && tgName) players = [tgName];
+
+  // ---------- навигация ----------
+  function go(screen, params, replace) {
+    clearTimers();
+    if (replace) stack.pop();
+    stack.push({ screen: screen, params: params || {} });
+    render();
+  }
+  function back() {
+    clearTimers();
+    if (stack.length > 1) stack.pop();
+    render();
+  }
+  function render() {
+    var top = stack[stack.length - 1];
+    document.body.className = "";
+    app.innerHTML = "";
+    screens[top.screen](top.params);
+    window.scrollTo(0, 0);
+    if (tg) {
+      if (stack.length > 1) tg.BackButton.show(); else tg.BackButton.hide();
+      tg.MainButton.hide();
+    }
+  }
+  if (tg) tg.BackButton.onClick(back);
+
+  function h(html) { app.insertAdjacentHTML("beforeend", html); }
+  function on(sel, fn) {
+    var els = app.querySelectorAll(sel);
+    for (var i = 0; i < els.length; i++) els[i].addEventListener("click", fn);
+  }
+  function header(title, sub) {
+    h('<header class="top">' + (stack.length > 1 ? '<button class="back" data-back>←</button>' : "") +
+      "<div><h1>" + esc(title) + "</h1>" + (sub ? '<p class="muted">' + esc(sub) + "</p>" : "") + "</div></header>");
+    on("[data-back]", back);
+  }
+
+  // Карточка с листанием (общий движок для простых колод)
+  function deck(opts) {
+    var cards = shuffle(opts.cards);
+    var i = 0;
+    function draw() {
+      var box = app.querySelector("[data-deck]");
+      if (i >= cards.length) {
+        box.innerHTML = '<div class="card end"><p class="big">Колода закончилась 🎉</p>' +
+          '<button class="btn" data-restart>Перемешать и сыграть ещё</button></div>';
+        box.querySelector("[data-restart]").onclick = function () { cards = shuffle(opts.cards); i = 0; draw(); };
+        return;
+      }
+      box.innerHTML =
+        '<div class="counter">' + (i + 1) + " / " + cards.length + "</div>" +
+        '<div class="card flip">' + (opts.prefix ? '<p class="prefix">' + esc(opts.prefix) + "</p>" : "") +
+        '<p class="big">' + esc(cards[i]) + "</p></div>" +
+        (opts.action ? '<button class="btn" data-action>' + esc(opts.action) + "</button>" : "") +
+        '<div class="row"><button class="btn ghost" data-skip>Пропустить</button>' +
+        '<button class="btn ' + (opts.action ? "ghost" : "") + '" data-next>Дальше</button></div>';
+      box.querySelector("[data-next]").onclick = function () { i++; haptic("light"); draw(); };
+      box.querySelector("[data-skip]").onclick = function () { i++; draw(); };
+      if (opts.action) box.querySelector("[data-action]").onclick = function () { opts.onAction(box); };
+    }
+    h('<section data-deck></section>');
+    draw();
+  }
+
+  // Обратный отсчёт 3-2-1 поверх экрана
+  function countdown(message, done) {
+    var n = 3;
+    var ov = document.createElement("div");
+    ov.className = "overlay";
+    document.body.appendChild(ov);
+    function tick() {
+      if (n === 0) {
+        ov.innerHTML = '<div class="count go">' + esc(message) + "</div>";
+        haptic("success");
+        timers.push(setTimeout(function () { ov.remove(); if (done) done(); }, 1600));
+        return;
+      }
+      ov.innerHTML = '<div class="count">' + n + "</div>";
+      haptic("medium");
+      n--;
+      timers.push(setTimeout(tick, 800));
+    }
+    tick();
+  }
+
+  // Таймер-кольцо
+  function ring(container, seconds, onEnd) {
+    var left = seconds;
+    var C = 2 * Math.PI * 44;
+    container.innerHTML =
+      '<div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="track"/>' +
+      '<circle cx="50" cy="50" r="44" class="bar" stroke-dasharray="' + C + '" stroke-dashoffset="0"/></svg>' +
+      '<span class="secs">' + left + "</span></div>";
+    var bar = container.querySelector(".bar");
+    var secs = container.querySelector(".secs");
+    var t = setInterval(function () {
+      left--;
+      secs.textContent = Math.max(left, 0);
+      bar.setAttribute("stroke-dashoffset", String(C * (1 - left / seconds)));
+      if (left <= 5 && left > 0) haptic("light");
+      if (left <= 0) { clearInterval(t); haptic("warning"); secs.textContent = "Стоп!"; if (onEnd) onEnd(); }
+    }, 1000);
+    timers.push(t);
+  }
+
+  // ---------- экраны ----------
+  var screens = {};
+
+  screens.home = function () {
+    h('<div class="hero"><div class="logo">Huddle</div><p class="muted">игры для своих</p></div>');
+    h('<button class="tile accent" data-set="friends-lite"><span class="tag">Бесплатно</span>' +
+      '<h2>Друзья · Лайт</h2><p>Айсберг, «Кто из нас», дебаты и ещё 5 игр для компании</p></button>');
+    h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Тихая ночь</h2>' +
+      "<p>Детектив на вечер: Северогорск, 1 января. Полиция говорит — несчастный случай.</p></div>");
+    h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Пары · Знакомство · Коллеги</h2>' +
+      "<p>Новые наборы и уровни: лайт, с перчинкой и огонь 18+</p></div>");
+    on("[data-set]", function (e) { go("set", { setId: e.currentTarget.getAttribute("data-set") }); });
+  };
+
+  screens.set = function (p) {
+    var set = window.HUDDLE_SETS[p.setId];
+    header(set.title, set.subtitle);
+    h('<div class="players"><div class="players-head"><b>Кто играет</b><span class="muted">' +
+      (players.length < 2 ? "добавь хотя бы двоих" : "в игре: " + players.length) + "</span></div>" +
+      '<div class="chips">' + players.map(function (n, i) {
+        return '<span class="chip">' + esc(n) + ' <button data-del="' + i + '" aria-label="Удалить">×</button></span>';
+      }).join("") + "</div>" +
+      '<form class="add" data-add><input maxlength="20" placeholder="Имя игрока" /><button class="btn small">+</button></form></div>');
+    app.querySelector("[data-add]").onsubmit = function (e) {
+      e.preventDefault();
+      var inp = e.target.querySelector("input");
+      var v = inp.value.trim();
+      if (v) { players.push(v); store("players", players); go("set", p, true); }
+    };
+    on("[data-del]", function (e) {
+      players.splice(+e.currentTarget.getAttribute("data-del"), 1);
+      store("players", players); go("set", p, true);
+    });
+    h('<p class="hint">Порядок на вечер: начните с «Айсберга», потом чередуйте быстрые игры и закончите заданием из «Вместе». Любую карточку можно пропустить.</p>');
+    set.games.forEach(function (g, i) {
+      h('<button class="game" data-game="' + i + '"><span class="emoji">' + g.emoji + "</span>" +
+        "<span><b>" + esc(g.title) + '</b><span class="muted">' + esc(g.blurb) + "</span></span></button>");
+    });
+    on("[data-game]", function (e) {
+      var g = set.games[+e.currentTarget.getAttribute("data-game")];
+      var needs = g.type === "debate" || (g.type === "tasks");
+      if (needs && players.length < 2) { alertMsg("Добавь хотя бы двоих игроков сверху"); return; }
+      go(g.type, { game: g });
+    });
+  };
+
+  function alertMsg(text) {
+    if (tg && tg.showAlert) tg.showAlert(text); else window.alert(text);
+  }
+
+  // Айсберг
+  screens.iceberg = function (p) {
+    var g = p.game;
+    var layer = p.layer;
+    if (layer === undefined) {
+      document.body.className = "sea l0";
+      header(g.title, "Чем глубже — тем честнее");
+      h('<div class="berg">' + bergSvg() + "</div>");
+      h('<ol class="layers">' + g.layers.map(function (l, i) {
+        return '<li class="lay l' + i + '"><b>' + esc(l.name) + "</b> — " + esc(l.sub) + "</li>";
+      }).join("") + "</ol>");
+      h('<p class="hint">Начинаем с верхушки. Нырнуть глубже — когда слой закончится. Всплыть можно всегда.</p>');
+      h('<button class="btn" data-start>Начать с верхушки</button>');
+      on("[data-start]", function () { go("iceberg", { game: g, layer: 0 }, true); });
+      return;
+    }
+    var L = g.layers[layer];
+    document.body.className = "sea l" + layer;
+    header(L.name, L.sub);
+    h('<div class="depth">' + g.layers.map(function (_, i) {
+      return '<span class="seg' + (i <= layer ? " on" : "") + '"></span>';
+    }).join("") + "</div>");
+    var cards = shuffle(L.cards);
+    var i = 0;
+    h('<section data-ice></section>');
+    var box = app.querySelector("[data-ice]");
+    function draw() {
+      var last = layer === g.layers.length - 1;
+      if (i >= cards.length) {
+        box.innerHTML = '<div class="card"><p class="big">' +
+          (last ? "Вы на самом дне. Это было честно 🤍" : "Слой пройден. Готовы нырнуть?") + "</p></div>" +
+          (last ? '<button class="btn" data-up>Всплыть на верхушку</button>'
+                : '<button class="btn" data-dive>Нырнуть: ' + esc(g.layers[layer + 1].name) + "</button>") +
+          (layer > 0 ? '<button class="btn ghost" data-rise>Всплыть на слой выше</button>' : "");
+      } else {
+        box.innerHTML = '<div class="counter">' + (i + 1) + " / " + cards.length + "</div>" +
+          '<div class="card flip"><p class="big">' + esc(cards[i]) + "</p></div>" +
+          '<div class="row"><button class="btn ghost" data-skip>Пропустить</button><button class="btn" data-next>Дальше</button></div>' +
+          (layer > 0 ? '<button class="link" data-rise>↑ Всплыть на слой выше</button>' : "");
+      }
+      bind();
+    }
+    function bind() {
+      var q = function (s) { return box.querySelector(s); };
+      if (q("[data-next]")) q("[data-next]").onclick = function () { i++; haptic("light"); draw(); };
+      if (q("[data-skip]")) q("[data-skip]").onclick = function () { i++; draw(); };
+      if (q("[data-dive]")) q("[data-dive]").onclick = function () { dive(layer + 1); };
+      if (q("[data-rise]")) q("[data-rise]").onclick = function () { go("iceberg", { game: g, layer: layer - 1 }, true); };
+      if (q("[data-up]")) q("[data-up]").onclick = function () { go("iceberg", { game: g, layer: 0 }, true); };
+    }
+    function dive(next) {
+      haptic("heavy");
+      var ov = document.createElement("div");
+      ov.className = "dive l" + next;
+      ov.innerHTML = "<p>Вы " + (next === 1 ? "под водой" : "на глубине") + "</p><span>" + esc(g.layers[next].sub) + "</span>";
+      document.body.appendChild(ov);
+      timers.push(setTimeout(function () { ov.remove(); go("iceberg", { game: g, layer: next }, true); }, 1500));
+    }
+    draw();
+  };
+
+  function bergSvg() {
+    return '<svg viewBox="0 0 300 220" aria-hidden="true">' +
+      '<rect x="0" y="70" width="300" height="150" class="water"/>' +
+      '<polygon points="150,10 190,70 110,70" class="ice top"/>' +
+      '<polygon points="110,70 190,70 225,140 75,140" class="ice mid"/>' +
+      '<polygon points="75,140 225,140 190,210 110,210" class="ice deep"/>' +
+      '<line x1="0" y1="70" x2="300" y2="70" class="line"/></svg>';
+  }
+
+  // Кто из нас — голосуем пальцем
+  screens.vote = function (p) {
+    header(p.game.title, "На счёт три все показывают пальцем");
+    deck({
+      cards: p.game.cards,
+      prefix: p.game.prefix,
+      action: "Голосуем! 3, 2, 1…",
+      onAction: function () { countdown("Показывайте! 👉"); }
+    });
+  };
+
+  // 10 из 10, но — все одновременно
+  screens.tenBut = function (p) {
+    header(p.game.title, "Все одновременно: 👍 беру или 👎 нет уж");
+    deck({
+      cards: p.game.cards,
+      action: "Решаем! 3, 2, 1…",
+      onAction: function () { countdown("👍 или 👎?"); }
+    });
+  };
+
+  screens.cards = function (p) {
+    header(p.game.title, p.game.blurb);
+    deck({ cards: p.game.cards });
+  };
+
+  // Выбери число
+  screens.number = function (p) {
+    var g = p.game;
+    var mapping = shuffle(g.cards);
+    var used = {};
+    header(g.title, "Называй число — и выполняй");
+    h('<div class="grid" data-grid></div><button class="btn ghost" data-reshuffle>Перемешать заново</button>');
+    function draw() {
+      app.querySelector("[data-grid]").innerHTML = mapping.map(function (_, i) {
+        return '<button class="num' + (used[i] ? " used" : "") + '" data-n="' + i + '">' + (i + 1) + "</button>";
+      }).join("");
+      on("[data-n]", function (e) {
+        var n = +e.currentTarget.getAttribute("data-n");
+        used[n] = true; haptic("medium");
+        showSheet('<p class="prefix">Число ' + (n + 1) + '</p><p class="big">' + esc(mapping[n]) + "</p>", draw);
+      });
+    }
+    on("[data-reshuffle]", function () { mapping = shuffle(g.cards); used = {}; draw(); });
+    draw();
+  };
+
+  function showSheet(inner, onClose) {
+    var ov = document.createElement("div");
+    ov.className = "sheet-wrap";
+    ov.innerHTML = '<div class="sheet card flip">' + inner + '<button class="btn" data-close>Готово</button></div>';
+    document.body.appendChild(ov);
+    ov.querySelector("[data-close]").onclick = function () { ov.remove(); if (onClose) onClose(); };
+  }
+
+  // 5-4-3-2-1
+  screens.countdownList = function (p) {
+    var g = p.game;
+    var rounds = shuffle(g.rounds);
+    var r = 0;
+    header(g.title, "60 секунд на весь раунд");
+    h('<section data-r></section>');
+    var box = app.querySelector("[data-r]");
+    function draw() {
+      clearTimers();
+      if (r >= rounds.length) {
+        box.innerHTML = '<div class="card"><p class="big">Все раунды сыграны 🎉</p></div><button class="btn" data-again>Ещё раз</button>';
+        box.querySelector("[data-again]").onclick = function () { rounds = shuffle(g.rounds); r = 0; draw(); };
+        return;
+      }
+      var nums = [5, 4, 3, 2, 1];
+      box.innerHTML = '<div class="counter">Раунд ' + (r + 1) + " / " + rounds.length + "</div>" +
+        '<div class="card"><ul class="five">' + rounds[r].map(function (t, i) {
+          return "<li><b>" + nums[i] + "</b> " + esc(t) + "</li>";
+        }).join("") + "</ul></div>" +
+        '<div data-timer class="timer-slot"></div>' +
+        '<div class="row"><button class="btn" data-go>Старт: 60 секунд</button><button class="btn ghost" data-next>Следующий</button></div>';
+      box.querySelector("[data-go]").onclick = function (e) {
+        e.currentTarget.disabled = true;
+        ring(box.querySelector("[data-timer]"), g.seconds);
+      };
+      box.querySelector("[data-next]").onclick = function () { r++; draw(); };
+    }
+    draw();
+  };
+
+  // Протестую!
+  var scores = {};
+  screens.debate = function (p) {
+    var g = p.game;
+    var topics = shuffle(g.topics);
+    var t = 0;
+    header(g.title, "Жребий решает, кто за, а кто против");
+    h('<section data-d></section>');
+    var box = app.querySelector("[data-d]");
+
+    function setup() {
+      clearTimers();
+      if (t >= topics.length) { topics = shuffle(g.topics); t = 0; }
+      var pair = shuffle(players).slice(0, 2);
+      var pro = pair[0], con = pair[1];
+      box.innerHTML = '<div class="card flip"><p class="prefix">Тема</p><p class="big">' + esc(topics[t]) + "</p></div>" +
+        '<div class="sides"><div class="side pro"><span>ЗА</span><b>' + esc(pro) + '</b></div>' +
+        '<div class="side con"><span>ПРОТИВ</span><b>' + esc(con) + "</b></div></div>" +
+        '<div class="row"><button class="btn ghost" data-reroll>Другая тема</button><button class="btn" data-begin>Начать дебаты</button></div>' +
+        scoreboard();
+      box.querySelector("[data-reroll]").onclick = function () { t++; setup(); };
+      box.querySelector("[data-begin]").onclick = function () { run(pro, con, 0, 0); };
+    }
+
+    // stage: раунд, part: 0 — первый спикер, 1 — второй
+    function run(pro, con, stage, part) {
+      clearTimers();
+      if (stage >= g.rounds.length) { vote(pro, con); return; }
+      var R = g.rounds[stage];
+      var who = R.both ? pro + " и " + con : (part === 0 ? pro : con);
+      var secs = R.both || R.each;
+      box.innerHTML = '<div class="counter">Раунд ' + (stage + 1) + " из " + g.rounds.length + " · " + esc(R.name) + "</div>" +
+        '<div class="card"><p class="prefix">' + esc(topics[t]) + '</p><p class="big">Говорит: ' + esc(who) + "</p>" +
+        (R.both ? '<p class="muted">Свободный спор, перебивать можно</p>' : "") + "</div>" +
+        '<div data-timer class="timer-slot"></div><button class="btn ghost" data-skipround>Дальше</button>';
+      var next = function () {
+        if (!R.both && part === 0) run(pro, con, stage, 1);
+        else run(pro, con, stage + 1, 0);
+      };
+      ring(box.querySelector("[data-timer]"), secs, function () { timers.push(setTimeout(next, 1200)); });
+      box.querySelector("[data-skipround]").onclick = next;
+    }
+
+    function vote(pro, con) {
+      box.innerHTML = '<div class="card"><p class="big">Судьи, кто убедительнее?</p><p class="muted">Голосуйте руками, победителя отметьте здесь</p></div>' +
+        '<div class="row"><button class="btn" data-win="' + esc(pro) + '">' + esc(pro) + '</button><button class="btn" data-win="' + esc(con) + '">' + esc(con) + "</button></div>";
+      box.querySelectorAll("[data-win]").forEach(function (b) {
+        b.onclick = function () {
+          var w = b.getAttribute("data-win");
+          scores[w] = (scores[w] || 0) + 1;
+          haptic("success");
+          t++;
+          setup();
+        };
+      });
+    }
+
+    function scoreboard() {
+      var names = Object.keys(scores);
+      if (!names.length) return "";
+      return '<div class="score"><b>Счёт</b> ' + names.sort(function (a, b) { return scores[b] - scores[a]; })
+        .map(function (n) { return esc(n) + " — " + scores[n]; }).join(" · ") + "</div>";
+    }
+    setup();
+  };
+
+  // Вместе
+  screens.tasks = function (p) {
+    var g = p.game;
+    header(g.title, g.blurb);
+    g.cards.forEach(function (c, i) {
+      h('<button class="task" data-t="' + i + '"><span class="n">' + (i + 1) + "</span><span>" + esc(c.text) + "</span>" +
+        (c.flow ? '<span class="tag">в приложении</span>' : "") + "</button>");
+    });
+    on("[data-t]", function (e) {
+      var c = g.cards[+e.currentTarget.getAttribute("data-t")];
+      if (c.flow === "anon") go("anon", {});
+      else if (c.flow === "mime") go("mime", {});
+      else showSheet('<p class="big">' + esc(c.text) + "</p>");
+    });
+  };
+
+  // Анонимные вопросы: телефон по кругу
+  screens.anon = function () {
+    header("Анонимные вопросы", "Передавайте телефон по кругу");
+    var qs = [];
+    var k = 0;
+    h('<section data-a></section>');
+    var box = app.querySelector("[data-a]");
+    function ask() {
+      if (k >= players.length) { reveal(shuffle(qs), 0); return; }
+      box.innerHTML = '<div class="card"><p class="prefix">Телефон у игрока</p><p class="big">' + esc(players[k]) + "</p>" +
+        '<textarea maxlength="200" placeholder="Вопрос для всей компании…"></textarea></div>' +
+        '<button class="btn" data-save>Спрятать и передать дальше</button>';
+      box.querySelector("[data-save]").onclick = function () {
+        var v = box.querySelector("textarea").value.trim();
+        if (v) qs.push(v);
+        k++; haptic("light"); ask();
+      };
+    }
+    function reveal(list, i) {
+      if (!list.length) { box.innerHTML = '<div class="card"><p class="big">Никто ничего не написал 🙈</p></div>'; return; }
+      if (i >= list.length) { box.innerHTML = '<div class="card"><p class="big">Вопросы закончились 🎉</p></div>'; return; }
+      box.innerHTML = '<div class="counter">' + (i + 1) + " / " + list.length + '</div><div class="card flip"><p class="big">' + esc(list[i]) + "</p></div>" +
+        '<button class="btn" data-next>Следующий</button>';
+      box.querySelector("[data-next]").onclick = function () { reveal(list, i + 1); };
+    }
+    ask();
+  };
+
+  // Пантомима: каждому тайно выдаётся, кого изображать (не себя)
+  screens.mime = function () {
+    header("Кого ты изображаешь", "Передавайте телефон по кругу");
+    var targets = derange(players);
+    var k = 0;
+    h('<section data-m></section>');
+    var box = app.querySelector("[data-m]");
+    function step() {
+      if (k >= players.length) {
+        box.innerHTML = '<div class="card"><p class="big">Все знают свою роль. Показываем по очереди, остальные угадывают!</p></div>';
+        return;
+      }
+      box.innerHTML = '<div class="card"><p class="prefix">Телефон у игрока</p><p class="big">' + esc(players[k]) + '</p><p class="muted">Остальные, не подглядывайте</p></div>' +
+        '<button class="btn" data-show>Показать мне</button>';
+      box.querySelector("[data-show]").onclick = function () {
+        box.innerHTML = '<div class="card flip"><p class="prefix">Ты изображаешь</p><p class="big">' + esc(targets[k]) + "</p></div>" +
+          '<button class="btn" data-hide>Запомнил(а), скрыть и передать</button>';
+        box.querySelector("[data-hide]").onclick = function () { k++; step(); };
+      };
+    }
+    step();
+  };
+
+  function derange(arr) {
+    if (arr.length < 2) return arr.slice();
+    var out;
+    do { out = shuffle(arr); } while (out.some(function (v, i) { return v === arr[i]; }));
+    return out;
+  }
+
+  // ---------- старт ----------
+  if (tg && tg.initData) document.documentElement.classList.add("tg");
+  if (tg) {
+    tg.ready();
+    tg.expand();
+    document.documentElement.setAttribute("data-theme", tg.colorScheme === "light" ? "light" : "dark");
+    tg.onEvent("themeChanged", function () {
+      document.documentElement.setAttribute("data-theme", tg.colorScheme === "light" ? "light" : "dark");
+    });
+  }
+  go("home");
+})();
