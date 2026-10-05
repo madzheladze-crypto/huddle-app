@@ -198,7 +198,19 @@
       "<p>Детектив на вечер: Северогорск, 1 января. Полиция говорит — несчастный случай.</p></div>");
     h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Пары · Знакомство · Коллеги</h2>' +
       "<p>Новые наборы и уровни: лайт, с перчинкой и огонь 18+</p></div>");
-    on("[data-set]", function (e) { go("set", { setId: e.currentTarget.getAttribute("data-set") }); });
+    on("[data-set]", function (e) { go("setIntro", { setId: e.currentTarget.getAttribute("data-set") }); });
+  };
+
+  screens.setIntro = function (p) {
+    var set = window.HUDDLE_SETS[p.setId];
+    header(set.title, set.subtitle);
+    h('<div class="cover">' + set.games.map(function (g) { return "<span>" + g.emoji + "</span>"; }).join("") + "</div>");
+    h('<div class="card"><p class="prefix">Внутри</p><div class="chips">' + set.games.map(function (g) {
+      return '<span class="chip">' + g.emoji + " " + esc(g.title) + "</span>";
+    }).join("") + "</div></div>");
+    h('<ul class="rules">' + (set.intro || []).map(function (r) { return "<li>" + esc(r) + "</li>"; }).join("") + "</ul>");
+    h('<button class="btn" data-go>Поехали</button>');
+    on("[data-go]", function () { go("set", p, true); });
   };
 
   screens.set = function (p) {
@@ -234,7 +246,7 @@
       var g = set.games[+e.currentTarget.getAttribute("data-game")];
       var needs = g.type === "debate" || (g.type === "tasks");
       if (needs && players.length < 2) { alertMsg("Добавь хотя бы двоих игроков сверху"); return; }
-      go(g.type, { game: g, setId: set.id });
+      go(g.type === "iceberg" ? "iceberg" : "rules", { game: g, setId: set.id });
     });
   };
 
@@ -246,6 +258,15 @@
     if (tg && tg.showConfirm) tg.showConfirm(text, function (ok) { if (ok) yes(); });
     else if (window.confirm(text)) yes();
   }
+
+  screens.rules = function (p) {
+    var g = p.game;
+    header(g.title, g.blurb);
+    h('<div class="cover big-emoji">' + g.emoji + "</div>");
+    h('<div class="card"><p class="prefix">Как играть</p><ol class="rules">' + (g.rules || []).map(function (r) { return "<li>" + esc(r) + "</li>"; }).join("") + "</ol></div>");
+    h('<button class="btn" data-play>Понятно, начинаем</button>');
+    on("[data-play]", function () { go(g.type, p, true); });
+  };
 
   // Айсберг
   screens.iceberg = function (p) {
@@ -259,6 +280,7 @@
         var pr = progress([{ key: p.setId + ":" + g.id + ":" + i, items: l.cards }]);
         return '<li class="lay l' + i + '" data-jump="' + i + '"><b>' + esc(l.name) + "</b> — " + esc(l.sub) + progLabel(pr) + "</li>";
       }).join("") + "</ol>");
+      h('<ul class="rules">' + (g.rules || []).map(function (r) { return "<li>" + esc(r) + "</li>"; }).join("") + "</ul>");
       h('<p class="hint">Можно начать с верхушки или сразу нырнуть — нажми на нужный слой. Переключаться можно в любой момент.</p>');
       h('<button class="btn" data-start>Начать с верхушки</button>');
       on("[data-jump]", function (e) { go("iceberg", { game: g, setId: p.setId, layer: +e.currentTarget.getAttribute("data-jump") }, true); });
@@ -403,13 +425,14 @@
           return "<li><b>" + nums[i] + "</b> " + esc(t) + "</li>";
         }).join("") + "</ul></div>" +
         '<div data-timer class="timer-slot"></div>' +
-        '<div class="row"><button class="btn" data-go>Старт: 60 секунд</button><button class="btn ghost" data-next>Следующий</button></div>';
+        '<div class="row">' + (r > 0 ? '<button class="btn ghost" style="flex:0 0 56px" data-prev>←</button>' : "") + '<button class="btn" data-go>Старт: 60 секунд</button><button class="btn ghost" data-next>Следующий</button></div>';
       box.querySelector("[data-go]").onclick = function (e) {
         e.currentTarget.disabled = true;
         if (order[r]) markSeen(ckey, order[r]);
         ring(box.querySelector("[data-timer]"), g.seconds);
       };
       box.querySelector("[data-next]").onclick = function () { r++; draw(); };
+      if (r > 0) box.querySelector("[data-prev]").onclick = function () { r--; draw(); };
     }
     draw();
   };
@@ -484,18 +507,20 @@
   // Вместе
   screens.tasks = function (p) {
     var g = p.game;
-    header(g.title, g.blurb);
-    g.cards.forEach(function (c, i) {
-      var done = isSeen(p.setId + ":" + g.id, c.text);
-      h('<button class="task' + (done ? " done" : "") + '" data-t="' + i + '"><span class="n">' + (done ? "✓" : i + 1) + "</span><span>" + esc(c.text) + "</span>" +
-        (c.flow ? '<span class="tag">в приложении</span>' : "") + "</button>");
-    });
+    var tkey = p.setId + ":" + g.id;
+    header(g.title, "Выбирайте число — за ним спрятано задание");
+    h('<div class="grid" data-grid></div>');
+    app.querySelector("[data-grid]").innerHTML = g.cards.map(function (c, i) {
+      return '<button class="num' + (isSeen(tkey, c.text) ? " used" : "") + '" data-t="' + i + '">' + (i + 1) + "</button>";
+    }).join("");
     on("[data-t]", function (e) {
-      var c = g.cards[+e.currentTarget.getAttribute("data-t")];
-      markSeen(p.setId + ":" + g.id, c.text);
-      if (c.flow === "anon") go("anon", {});
-      else if (c.flow === "mime") go("mime", {});
-      else showSheet('<p class="big">' + esc(c.text) + "</p>", function () { go("tasks", p, true); });
+      var n = +e.currentTarget.getAttribute("data-t");
+      var c = g.cards[n];
+      markSeen(tkey, c.text);
+      haptic("medium");
+      showSheet('<p class="prefix">Задание ' + (n + 1) + '</p><p class="big">' + esc(c.text) + "</p>", function () {
+        if (c.flow) go(c.flow, p); else go("tasks", p, true);
+      });
     });
   };
 
@@ -521,8 +546,9 @@
       if (!list.length) { box.innerHTML = '<div class="card"><p class="big">Никто ничего не написал 🙈</p></div>'; return; }
       if (i >= list.length) { box.innerHTML = '<div class="card"><p class="big">Вопросы закончились 🎉</p></div>'; return; }
       box.innerHTML = '<div class="counter">' + (i + 1) + " / " + list.length + '</div><div class="card flip"><p class="big">' + esc(list[i]) + "</p></div>" +
-        '<button class="btn" data-next>Следующий</button>';
+        '<div class="row">' + (i > 0 ? '<button class="btn ghost" style="flex:0 0 56px" data-prev>←</button>' : "") + '<button class="btn" data-next>Следующий</button></div>';
       box.querySelector("[data-next]").onclick = function () { reveal(list, i + 1); };
+      if (i > 0) box.querySelector("[data-prev]").onclick = function () { reveal(list, i - 1); };
     }
     ask();
   };
@@ -561,7 +587,7 @@
   var st = document.createElement("style");
   st.textContent = ".seen{display:inline-block;align-self:flex-start;font-size:12px;padding:3px 9px;border-radius:999px;background:var(--soft);color:var(--muted);margin-bottom:10px}" +
     ".prog{font-size:12px;font-weight:600;color:var(--accent);margin-left:6px}.prog.full{color:#3fbf7f}" +
-    ".game.done,.task.done{opacity:.6}.task.done .n{color:#3fbf7f}.depth .seg{height:12px;cursor:pointer}.lay{cursor:pointer}";
+    ".game.done,.task.done{opacity:.6}.task.done .n{color:#3fbf7f}.depth .seg{height:12px;cursor:pointer}.lay{cursor:pointer}.cover{display:flex;gap:8px;font-size:34px;padding:0 0 14px;flex-wrap:wrap}.cover.big-emoji{font-size:64px}.rules{margin:0 0 16px 20px;line-height:1.5;font-size:16px}.rules li{margin-bottom:6px}.card .rules{margin-bottom:0}";
   document.head.appendChild(st);
   if (tg && tg.initData) document.documentElement.classList.add("tg");
   if (tg) {
