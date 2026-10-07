@@ -230,6 +230,7 @@
 <div style="flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 48px 20px 24px; overflow-y: auto">
 <button class="back" onClick="{{ toOffice }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>Кабинет</button>
 <h2 style="margin: 0 0 4px; font: 700 26px 'Spectral', serif; color: #F3EEE3">Папка дела</h2>
+<sc-if value="{{ hasFolderStart }}" hint-placeholder-val="{{ false }}"><div style="flex: none; background: #1D1A12; border: 1px solid #D9A441; border-radius: 14px; padding: 12px 14px"><div style="font: 600 11px 'IBM Plex Mono', monospace; letter-spacing: 1.5px; color: #D9A441">С ЧЕГО НАЧАТЬ</div><div style="font-size: 14px; line-height: 1.45; color: #E9E3D6; margin-top: 4px">{{ folderStart }}</div></div></sc-if>
 <div class="mono" style="letter-spacing: 2px">МАТЕРИАЛЫ</div>
 <sc-for list="{{ folderDocs }}" as="m" hint-placeholder-count="3">
 <button class="row" onClick="{{ m.open }}">
@@ -272,6 +273,14 @@
 </sc-if>
 <sc-if value="{{ mat.isDoc }}" hint-placeholder-val="{{ true }}">
 <div style="display: flex; flex-direction: column; gap: 4px"><h2 style="margin: 0; font: 700 22px 'Spectral', serif; color: #F3EEE3">{{ mat.title }}</h2><div style="font-size: 13px; color: #8E887C">{{ mat.kind }}</div></div>
+</sc-if>
+<sc-if value="{{ hasCoach }}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; background: #15181C; border: 1px solid #D9A441; border-radius: 14px; padding: 14px 16px">
+<div style="font: 600 11px 'IBM Plex Mono', monospace; letter-spacing: 1.5px; color: #D9A441">КАК РАБОТАТЬ С ДОКУМЕНТАМИ</div>
+<div style="font-size: 14px; line-height: 1.5; color: #E9E3D6; margin-top: 6px">Нажмите на важную фразу — она подсветится и станет уликой: попадёт на доску, а если в ней есть время — на хронологию. Нажмите ещё раз, чтобы снять. Попробуйте на мигающей фразе.</div>
+<div style="font-size: 14px; line-height: 1.5; color: #E9E3D6; margin-top: 8px">Не уверены, что важно? Внизу лупа: она подчеркнёт фразу, которую стоит отметить. Это подсказка. Если лупы нет — всё важное в документе уже отмечено.</div>
+<button class="btn" style="margin-top: 12px; min-height: 42px" onClick="{{ coachOk }}">Понятно</button>
+</div>
 </sc-if>
 <sc-if value="{{ mat.hasNote }}" hint-placeholder-val="{{ false }}">
 <div style="border-left: 3px solid #D9A441; padding: 2px 0 2px 12px; font: 400 italic 15px/1.5 'Spectral', serif; color: #C9C3B7">{{ mat.note }}</div>
@@ -327,6 +336,7 @@
 <sc-if value="{{ mat.canLupa }}" hint-placeholder-val="{{ true }}">
 <button class="btn ghost" style="display: flex; align-items: center; justify-content: center; gap: 8px" onClick="{{ lupa }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="6"></circle><path d="M15 15l5 5"></path></svg>{{ mat.lupaText }}</button>
 </sc-if>
+<sc-if value="{{ mat.lupaDone }}" hint-placeholder-val="{{ false }}"><div style="text-align: center; font-size: 13px; color: #8E887C; padding: 6px 0">Всё важное в этом документе отмечено</div></sc-if>
 </div>
 </sc-if>
 

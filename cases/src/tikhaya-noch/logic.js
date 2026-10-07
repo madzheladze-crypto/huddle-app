@@ -6,7 +6,7 @@ var MATS = {
     [{ t: 'Но брат никогда не принимал снотворное. ', c: 'never' }, { t: 'А в крови у него нашли тройную дозу.' }],
     [{ t: 'У меня есть основания полагать, что к его смерти причастна его жена, Виктория.' }]
   ] },
-  rap: { title: 'Рапорт участкового', kind: 'Документ · ОМВД по Карельскому району', base: true, paras: [
+  rap: { title: 'Рапорт участкового', kind: 'Документ · ОМВД по Карельскому району', base: false, paras: [
     [{ t: '02:51 — вызов: пос. Сосновая Гавань, ул. Береговая, д. 7. ', time: '02:51', tl: 'Вызов полиции' },
      { t: 'На террасе в кресле обнаружен Лисин Максим Викторович, 38 лет. ', c: 'terrace' },
      { t: 'Одет в рубашку и брюки, верхней одежды нет.' }],
@@ -16,13 +16,13 @@ var MATS = {
      { t: 'Мобильный телефон погибшего обнаружен на письменном столе в кабинете.', c: 'phone' }],
     [{ t: 'Следов борьбы и внешних повреждений не выявлено. ' }, { t: 'Признаков преступления не установлено, смерть наступила в результате несчастного случая. ' }, { t: 'Материал направлен для решения об отказе в возбуждении уголовного дела.' }]
   ] },
-  exp: { title: 'Заключение экспертизы', kind: 'Документ', base: true, paras: [
+  exp: { title: 'Заключение экспертизы', kind: 'Документ', base: false, paras: [
     [{ t: 'Причина смерти: общее переохлаждение. ' }, { t: 'В крови обнаружены алкоголь (1,8 ‰) и препарат «Сонафин».' }],
     [{ t: 'Концентрация «Сонафина» соответствует трём таблеткам — тройной терапевтической дозе. ', c: 'dose' },
      { t: 'Распределение препарата указывает на два приёма с интервалом 1–1,5 часа.', c: 'twice' }],
     [{ t: 'Время смерти: между 23:00 и 01:00. ', c: 'window', time: '23:00', tl: 'Начало окна смерти (до 01:00)' }, { t: 'Следов инъекций нет.' }]
   ] },
-  nina: { title: 'Разговор Лизы с Ниной Павловной', kind: 'Расшифровка аудиозаписи · прислала Лиза', base: true,
+  nina: { title: 'Разговор Лизы с Ниной Павловной', kind: 'Расшифровка аудиозаписи · прислала Лиза', base: false,
     note: 'Лиза записала разговор на телефон 1 января, на кухне дома в Сосновой Гавани, и приложила к письму: «Послушайте, что говорит Нина».',
     paras: [
     [{ t: 'ЛИЗА: Нина Пална, расскажите ещё раз, что было вечером.', who: 1 }],
@@ -49,7 +49,7 @@ var MATS = {
     [{ t: '«Сонафин», два блистера по 10 таблеток. ' }, { t: 'Рецепт на имя Лисиной Виктории Андреевны, от 2 декабря.', c: 'pills' }],
     [{ t: 'Осталось 11 таблеток: в первом блистере 3, во втором 8.' }]
   ], photo: true },
-  plan: { title: 'Схема дома', kind: 'План из архива застройщика · нашёл Дима', base: true,
+  plan: { title: 'Схема дома', kind: 'План из архива застройщика · нашёл Дима', base: false,
     rooms: [
       { id: 'hall', name: 'ПРИХОЖАЯ', x: 20, y: 70, w: 90, h: 70 },
       { id: 'cab', name: 'КАБИНЕТ', x: 110, y: 70, w: 100, h: 70 },
@@ -652,21 +652,26 @@ function shortOf(f) {
 }
 var BW = 600, BH = 1000;
 var TOUR = [
-  { title: 'ПАПКА ДЕЛА', r: [22, 366, 158, 143], text: 'Начните отсюда. В папке всё дело: письмо Лизы, рапорт, экспертиза, схема дома и досье на всех, кто был в доме. Читайте и нажимайте на важные фразы — они станут уликами.' },
+  { title: 'ПАПКА ДЕЛА', r: [22, 366, 158, 143], text: 'Начните отсюда. Первым откройте письмо Лизы — к нему приложены документы, а дальше папка будет пополняться по ходу дела. Читайте и нажимайте на важные фразы — они станут уликами.' },
   { title: 'ДИМА · ОПЕРАТИВНИК', r: [198, 356, 174, 145], text: 'Ваш оперативник. Попросите — пробьёт людей, достанет документы, договорится о встрече. Всё, что он найдёт, падает в папку.' },
   { title: 'ДОСКА УЛИК', r: [16, 14, 222, 185], text: 'Отмеченные фразы попадают сюда. Перетаскивайте их на карточки людей и связывайте нитками — так видно, кто к чему причастен.' },
   { title: 'ХРОНОЛОГИЯ', r: [16, 214, 358, 103], text: 'Улики со временем сами встают на шкалу. Так видно, что и когда случилось той ночью.' },
   { title: 'БЛОКНОТ', r: [26, 528, 104, 107], text: 'Ваши догадки и вопросы. Любую заметку можно приколоть к доске, как улику.' },
   { title: 'ОТЧЁТ ЛИЗЕ', r: [152, 532, 128, 105], text: 'Когда будете готовы — напишите клиенту вывод и подкрепите его уликами. Здесь же её сообщения.' },
-  { title: 'КОФЕ', r: [296, 528, 64, 64], text: 'Если застряли: чашка кофе — и мысль, куда смотреть дальше. Три чашки на каждую версию дела.' }
+  { title: 'КОФЕ И ПОДСКАЗКИ', r: [296, 528, 64, 64], text: 'Застряли — выпейте кофе: появится мысль, куда смотреть дальше (три чашки на версию). Есть и другие подсказки: лупа в документах, совет Димы, кнопка «Подсказка» на допросе и звонок наставнику из отчёта. Каждая подсказка засчитывается — в конце дела видно, сколько вы взяли.' }
 ];
+// что открывается само по ходу дела: письмо Лизы приносит её вложения, запись с Ниной — схему дома
+var AUTO = { rap: 'letter', exp: 'letter', nina: 'letter', plan: 'nina' };
+var DOSS_NEED = { d_nina: 'nina', d_kirill: 'nina', d_denis: 'guests', d_marina: 'guests' };
+function matAvail(id, s) { return !!(MATS[id].base || s.unlocked[id] || (AUTO[id] && s.opened[AUTO[id]])); }
+function dossAvail(id, s) { var n = DOSS_NEED[id]; return s.version >= 2 || !n || !!(s.opened[n] || s.unlocked[n]); }
 function reqsFor(v) { return [null, REQS, REQS2, REQS3, REQS4, REQS5][v]; }
 function lizaFor(v) { return [null, LIZA_MSGS, LIZA_MSGS2, LIZA_MSGS3, LIZA_MSGS4, LIZA_MSGS5][v]; }
 function docsUpTo(v) { return DOCS.concat(v >= 2 ? DOCS2 : [], v >= 3 ? DOCS3 : [], v >= 4 ? DOCS4 : [], v >= 5 ? DOCS5 : []); }
 function initState() {
   var pos = {}; Object.keys(POS0).forEach(function (k) { pos[k] = { x: POS0[k][0], y: POS0[k][1] }; });
   return { screen: 'intro', name: '', mat: null, back: 'folder', opened: {}, ev: [], notes: {}, noteSeq: 0, place: {}, status: {}, sel: null, ghost: null,
-    pos: pos, fpos: {}, threads: [], threadMode: false, threadFrom: null, sheet: null, room: 'kitchen', zoom: false, thought: null, coffeeUsed: 0, lizaChat: [], lizaUnread: 0, push: null, tour: false, tourStep: 0, boardZ: 1, toured: false, fails: 0, slots: {}, slotPick: null, ending: null, pushFrom: 'liza', version: 1, iq: {}, iqOpen: null, pick: false, flags: {},
+    pos: pos, fpos: {}, threads: [], threadMode: false, threadFrom: null, sheet: null, room: 'kitchen', zoom: false, thought: null, coffeeUsed: 0, lizaChat: [], lizaUnread: 0, push: null, tour: false, tourStep: 0, boardZ: 1, coach: false, coached: false, toured: false, fails: 0, slots: {}, slotPick: null, ending: null, pushFrom: 'liza', version: 1, iq: {}, iqOpen: null, pick: false, flags: {},
     lupa: {}, lupaR: [], hints: 0, unlocked: {}, chat: [], asked: {}, typing: false, dimaUnread: true,
     tl: [], tlTime: '', tlText: '', draft: '', suspect: null, attach: [], result: '', nudge: '', toast: '' };
 }
@@ -828,8 +833,10 @@ class Component extends DCLogic {
     this._t = setTimeout(function () { self.setState({ toast: '' }); }, 2000);
   }
   openMat(id, back) {
-    var o = Object.assign({}, this.state.opened); o[id] = true;
-    this.setState({ screen: 'mat', mat: id, opened: o, toast: '', sheet: null, back: back || 'folder' });
+    var s0 = this.state, o = Object.assign({}, s0.opened); o[id] = true;
+    var newly = Object.keys(AUTO).filter(function (k) { return AUTO[k] === id && !matAvail(k, s0); });
+    this.setState({ screen: 'mat', mat: id, opened: o, toast: '', sheet: null, back: back || 'folder', coach: !s0.coached && !MATS[id].person });
+    if (newly.length) { var self = this; setTimeout(function () { self.flash(id === 'letter' ? 'Лиза приложила к письму документы — они в папке' : 'Новый материал в папке'); }, 1200); }
   }
   item(id) {
     var s = this.state;
@@ -925,7 +932,7 @@ class Component extends DCLogic {
     var stop = function (e) { if (e && e.stopPropagation) e.stopPropagation(); };
 
     // папка
-    var avail = docsUpTo(s.version).filter(function (id) { return MATS[id].base || s.unlocked[id]; });
+    var avail = docsUpTo(s.version).filter(function (id) { return matAvail(id, s); });
     var fresh = avail.filter(function (id) { return !s.opened[id]; }).length;
     avail = avail.filter(function (id) { return !s.opened[id]; }).concat(avail.filter(function (id) { return s.opened[id]; }));
     var folderDocs = avail.map(function (id) {
@@ -933,7 +940,12 @@ class Component extends DCLogic {
       return { title: MATS[id].title, kind: MATS[id].kind, badge: isNew ? 'НОВОЕ' : 'ПРОЧИТАНО', badgeColor: isNew ? '#D9A441' : '#6B665C',
         open: function () { self.openMat(id, 'folder'); } };
     });
-    var folderPeople = DOSS.filter(function (id) { return !s.opened[id]; }).concat(DOSS.filter(function (id) { return s.opened[id]; })).map(function (id) {
+    var folderStartText = !s.opened.letter ? 'Начните с письма Лизы: отметьте в нём важное. К письму приложены документы — они появятся в папке.'
+      : (!s.opened.rap || !s.opened.exp || !s.opened.nina) ? 'Лиза приложила к письму рапорт участкового, заключение экспертизы и запись разговора с Ниной Павловной. Прочитайте их и отметьте важное.'
+      : 'Загляните в досье ниже — кто есть кто. А чего не хватает, просите у Димы: он в кабинете, на ноутбуке.';
+    var folderStartDone = s.opened.letter && s.opened.rap && s.opened.exp && s.opened.nina && (Object.keys(s.asked).length > 0 || DOSS.some(function (d) { return s.opened[d]; }));
+    var dossList = DOSS.filter(function (id) { return dossAvail(id, s); });
+    var folderPeople = dossList.filter(function (id) { return !s.opened[id]; }).concat(dossList.filter(function (id) { return s.opened[id]; })).map(function (id) {
       var M = MATS[id], P = PEOPLE.filter(function (p) { return p.id === M.person; })[0];
       return { short: P.name, ini: P.name[0], bg: P.bg, sub: s.opened[id] ? P.role : 'не прочитано', subColor: s.opened[id] ? '#8E887C' : '#D9A441',
         open: function () { self.openMat(id, 'folder'); } };
@@ -951,14 +963,14 @@ class Component extends DCLogic {
       if (M.rooms) { var ri = 0; M.rooms.forEach(function (r, i) { if (r.id === s.room) ri = i; }); plist = [[{ t: M.rooms[ri].name + '. ', who: 2, id: 'x' }].concat(M.paras[ri])]; }
       mat = { title: M.title, kind: M.kind, isDossier: !!M.person, isDoc: !M.person, bg: P ? P.bg : '#333',
         isChat: !!M.chat, notChat: !M.chat, msgs: M.chat ? M.paras.map(function (para) { var f = para[0], g = s.ev.indexOf(f.id) >= 0; return { cls: f.who === 'v' ? 'msg me' : 'msg', time: f.tm, parts: [{ t: f.show, cls: 'frag' + (g ? ' got' : '') + (s.lupaR.indexOf(f.id) >= 0 && !g ? ' lupa' : ''), toggle: function () { self.toggleFrag(f.id); } }] }; }) : [],
-        hasNote: !!M.note, note: M.note || '', canLupa: keysLeft.length > 0, lupaText: s.lupaR.some(function (id) { return allKeys.some(function (k) { return k.id === id; }); }) ? 'Лупа: подсветить ещё одну улику · −1 подсказка' : 'Лупа: подсветить одну улику · −1 подсказка', isPlan: !!M.rooms, hasPhoto: !!M.photo,
+        hasNote: !!M.note, note: M.note || '', canLupa: keysLeft.length > 0, lupaDone: keysLeft.length === 0 && allKeys.length > 0, lupaText: s.lupaR.some(function (id) { return allKeys.some(function (k) { return k.id === id; }); }) ? 'Лупа: подсветить ещё одну улику · −1 подсказка' : 'Лупа: подсветить одну улику · −1 подсказка', isPlan: !!M.rooms, hasPhoto: !!M.photo,
         rooms: (M.rooms || []).map(function (r) { return { name: r.name, x: r.x + 'px', y: r.y + 'px', w: r.w + 'px', h: r.h + 'px', bg: r.id === s.room ? '#F2D27A' : 'rgba(255,255,255,.55)', pick: function () { self.setState({ room: r.id }); } }; }),
         paras: plist.map(function (para) {
         var isQ = para[0] && para[0].who === 1;
         return { style: isQ ? 'margin: 0 0 10px; color: #6D6455; font-style: italic' : 'margin: 0 0 10px', parts: para.map(function (f) {
           var got = s.ev.indexOf(f.id) >= 0;
           if (f.who === 2) return { t: f.t, cls: 'mono', toggle: function () {} };
-          return { t: f.t, cls: 'frag' + (got ? ' got' : '') + (s.lupaR.indexOf(f.id) >= 0 && !got ? ' lupa' : ''),
+          return { t: f.t, cls: 'frag' + (got ? ' got' : '') + (s.lupaR.indexOf(f.id) >= 0 && !got ? ' lupa' : '') + (s.coach && keysLeft[0] && keysLeft[0].id === f.id ? ' pulse' : ''),
             toggle: function () { self.toggleFrag(f.id); } };
         }) };
       }) };
@@ -1047,7 +1059,7 @@ class Component extends DCLogic {
           setTimeout(function () { var st0 = self.state; self.setState({ typing: false, chat: st0.chat.concat([{ t: r.no, cls: 'bubble-in' }]) }); }, 1100);
           return;
         }
-        var unread = docsUpTo(s.version).filter(function (dd) { return (MATS[dd].base || s.unlocked[dd]) && !s.opened[dd]; });
+        var unread = docsUpTo(s.version).filter(function (dd) { return matAvail(dd, s) && !s.opened[dd]; });
         if (r.ok && unread.length) {
           var bz = ['Шеф, я тебе уже скинул «' + MATS[unread[0]].title + '», а ты ещё не открывал. Изучи — потом проси ещё.', 'Погоди, сначала прочитай «' + MATS[unread[0]].title + '». Там может быть то, что ты ищешь.', 'Шеф, я на встрече. Пока изучи, что уже есть: «' + MATS[unread[0]].title + '». Освобожусь — займусь.'];
           self.setState({ chat: s.chat.concat([{ t: r.t, cls: 'bubble-out' }]), typing: true, busyN: (s.busyN || 0) + 1 });
@@ -1171,6 +1183,8 @@ class Component extends DCLogic {
       boardZ: zb, boardW: Math.round(this._bw * zb) + 'px', boardH: Math.round(this._bh * zb) + 'px', corkW: this._bw + 'px', corkH: this._bh + 'px', zoomLabel: Math.round((s.boardZ || 1) * 100) + '%',
       zoomIn: function () { self.setBoardZoom((s.boardZ || 1) + 0.2); }, zoomOut: function () { self.setBoardZoom((s.boardZ || 1) - 0.2); },
       zoomFit: function () { var sc = document.querySelector('[data-pinch]'); self.setBoardZoom(sc ? Math.min(sc.clientWidth / BW, sc.clientHeight / BH) : 0.6); },
+      hasFolderStart: s.version === 1 && !folderStartDone, folderStart: folderStartText,
+      hasCoach: !!s.coach && s.screen === 'mat', coachOk: function () { self.setState({ coach: false, coached: true }); },
       showTour: !!s.tour && s.screen === 'office',
       closeTour: function () { self.setState({ tour: false, tourStep: 0 }); },
       openTour: function () { self.setState({ tour: true, tourStep: 0 }); },
@@ -1208,7 +1222,7 @@ class Component extends DCLogic {
       dimaHint: function () {
         if (s.typing) return;
         var vis = reqsFor(s.version).filter(function (r) { return r.ok && !s.asked[r.id] && (!r.need || s.unlocked[r.need]) && (!r.needFlag || s.flags[r.needFlag]); })[0];
-        var unr = docsUpTo(s.version).filter(function (dd) { return (MATS[dd].base || s.unlocked[dd]) && !s.opened[dd]; })[0];
+        var unr = docsUpTo(s.version).filter(function (dd) { return matAvail(dd, s) && !s.opened[dd]; })[0];
         var ans = unr ? 'Сначала дочитай «' + MATS[unr].title + '» — там может быть ответ.' : (vis ? 'Я бы на твоём месте начал с этого: «' + vis.t + '».' : 'По этой версии полезного больше не вижу. Думай над тем, что уже есть.');
         self.setState({ chat: s.chat.concat([{ t: 'Дим, что посоветуешь?', cls: 'bubble-out' }]), typing: true, hints: s.hints + 1 });
         setTimeout(function () { var st = self.state; self.setState({ typing: false, chat: st.chat.concat([{ t: ans, cls: 'bubble-in' }]) }); }, 1100);

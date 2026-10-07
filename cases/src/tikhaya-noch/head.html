@@ -13,6 +13,8 @@ body{margin:0;background:#0E1013}
 .frag{cursor:pointer;border-radius:3px;transition:background .15s}
 .frag:hover{background:rgba(156,107,18,.14)}
 .frag.lupa{border-bottom:2px dashed #9C6B12}
+.frag.pulse{animation:fragPulse 1.4s ease-in-out infinite}
+@keyframes fragPulse{0%,100%{background:rgba(242,210,122,0)}50%{background:rgba(242,210,122,.6)}}
 .frag.got{background:#F2D27A;box-shadow:0 0 0 2px #F2D27A}
 .row{flex:none;box-sizing:border-box;max-width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;background:#191C21;border:1px solid #2A2E35;border-radius:14px;padding:14px 16px;color:#E9E3D6;font:500 15px 'IBM Plex Sans',sans-serif;cursor:pointer;min-height:60px}
 .row>span{min-width:0;overflow-wrap:anywhere}
