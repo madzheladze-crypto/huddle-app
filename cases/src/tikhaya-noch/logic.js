@@ -605,13 +605,22 @@ var LIZA_MSGS5 = [
   { at: 2040000, time: '6 янв · 20:45', t: 'Я сегодня впервые за неделю поспала днём.' },
   { at: 2640000, time: '6 янв · 22:30', t: 'Когда будете готовы — пишите отчёт. Я хочу услышать это от вас.' }
 ];
+var TOUR = [
+  { title: 'ПАПКА ДЕЛА', r: [22, 366, 158, 143], text: 'Начните отсюда. В папке всё дело: письмо Лизы, рапорт, экспертиза, схема дома и досье на всех, кто был в доме. Читайте и нажимайте на важные фразы — они станут уликами.' },
+  { title: 'ДИМА · ОПЕРАТИВНИК', r: [198, 356, 174, 145], text: 'Ваш оперативник. Попросите — пробьёт людей, достанет документы, договорится о встрече. Всё, что он найдёт, падает в папку.' },
+  { title: 'ДОСКА УЛИК', r: [16, 14, 222, 185], text: 'Отмеченные фразы попадают сюда. Перетаскивайте их на карточки людей и связывайте нитками — так видно, кто к чему причастен.' },
+  { title: 'ХРОНОЛОГИЯ', r: [16, 214, 358, 103], text: 'Улики со временем сами встают на шкалу. Так видно, что и когда случилось той ночью.' },
+  { title: 'БЛОКНОТ', r: [26, 528, 104, 107], text: 'Ваши догадки и вопросы. Любую заметку можно приколоть к доске, как улику.' },
+  { title: 'ОТЧЁТ ЛИЗЕ', r: [152, 532, 128, 105], text: 'Когда будете готовы — напишите клиенту вывод и подкрепите его уликами. Здесь же её сообщения.' },
+  { title: 'КОФЕ', r: [296, 528, 64, 64], text: 'Если застряли: чашка кофе — и мысль, куда смотреть дальше. Три чашки на каждую версию дела.' }
+];
 function reqsFor(v) { return [null, REQS, REQS2, REQS3, REQS4, REQS5][v]; }
 function lizaFor(v) { return [null, LIZA_MSGS, LIZA_MSGS2, LIZA_MSGS3, LIZA_MSGS4, LIZA_MSGS5][v]; }
 function docsUpTo(v) { return DOCS.concat(v >= 2 ? DOCS2 : [], v >= 3 ? DOCS3 : [], v >= 4 ? DOCS4 : [], v >= 5 ? DOCS5 : []); }
 function initState() {
   var pos = {}; Object.keys(POS0).forEach(function (k) { pos[k] = { x: POS0[k][0], y: POS0[k][1] }; });
   return { screen: 'intro', name: '', mat: null, back: 'folder', opened: {}, ev: [], notes: {}, noteSeq: 0, place: {}, status: {}, sel: null, ghost: null,
-    pos: pos, fpos: {}, threads: [], threadMode: false, threadFrom: null, sheet: null, room: 'kitchen', zoom: false, thought: null, coffeeUsed: 0, lizaChat: [], lizaUnread: 0, push: null, tour: false, toured: false, fails: 0, slots: {}, slotPick: null, ending: null, pushFrom: 'liza', version: 1, iq: {}, iqOpen: null, pick: false, flags: {},
+    pos: pos, fpos: {}, threads: [], threadMode: false, threadFrom: null, sheet: null, room: 'kitchen', zoom: false, thought: null, coffeeUsed: 0, lizaChat: [], lizaUnread: 0, push: null, tour: false, tourStep: 0, toured: false, fails: 0, slots: {}, slotPick: null, ending: null, pushFrom: 'liza', version: 1, iq: {}, iqOpen: null, pick: false, flags: {},
     lupa: {}, lupaR: [], hints: 0, unlocked: {}, chat: [], asked: {}, typing: false, dimaUnread: true,
     tl: [], tlTime: '', tlText: '', draft: '', suspect: null, attach: [], result: '', nudge: '', toast: '' };
 }
@@ -1089,16 +1098,16 @@ class Component extends DCLogic {
         if (s.coffeeUsed >= 3) { self.setState({ thought: { title: 'КОФЕ ЗАКОНЧИЛСЯ', t: 'Третья чашка была последней. Дальше — своей головой.', foot: 'Три чашки на версию.' } }); return; }
         self.setState({ coffeeUsed: s.coffeeUsed + 1, hints: s.hints + 1, thought: { title: 'ЧАШКА ' + (s.coffeeUsed + 1) + ' ИЗ 3', t: self.thoughtNext(), foot: 'Каждая чашка засчитывается как подсказка.' } });
       },
-      showTour: !!s.tour && s.screen === 'office', closeTour: function () { self.setState({ tour: false }); }, openTour: function () { self.setState({ tour: true }); },
-      tour: [
-        { title: 'ДОСКА УЛИК', text: 'Раскладывайте улики по людям, связывайте нитками', x: '22px', y: '58px', w: '196px' },
-        { title: 'ХРОНОЛОГИЯ', text: 'Что и когда случилось той ночью', x: '150px', y: '226px', w: '200px' },
-        { title: 'ПАПКА ДЕЛА', text: 'Всё дело: документы, схема дома, досье', x: '16px', y: '392px', w: '160px' },
-        { title: 'ДИМА', text: 'Оперативник вашего агентства: пробьёт людей, достанет документы, договорится о встрече', x: '204px', y: '380px', w: '170px' },
-        { title: 'БЛОКНОТ', text: 'Ваши догадки и вопросы', x: '14px', y: '540px', w: '130px' },
-        { title: 'ОТЧЁТ ЛИЗЕ', text: 'Ваши выводы клиенту и её сообщения', x: '150px', y: '548px', w: '140px' },
-        { title: 'КОФЕ', text: 'Если застряли', x: '268px', y: '610px', w: '106px' }
-      ],
+      showTour: !!s.tour && s.screen === 'office',
+      closeTour: function () { self.setState({ tour: false, tourStep: 0 }); },
+      openTour: function () { self.setState({ tour: true, tourStep: 0 }); },
+      nextTour: function () { var n = (s.tourStep || 0) + 1; if (n >= TOUR.length) self.setState({ tour: false, tourStep: 0 }); else self.setState({ tourStep: n }); },
+      ts: (function () {
+        var i = Math.min(s.tourStep || 0, TOUR.length - 1), t = TOUR[i], pad = 6, below = t.r[1] < 300;
+        return { n: i + 1, total: TOUR.length, title: t.title, text: t.text, next: i === TOUR.length - 1 ? 'Начинаем' : 'Далее',
+          x: (t.r[0] - pad) + 'px', y: (t.r[1] - pad) + 'px', w: (t.r[2] + pad * 2) + 'px', h: (t.r[3] + pad * 2) + 'px',
+          ty: below ? (t.r[1] + t.r[3] + pad + 14) + 'px' : 'auto', tb: below ? 'auto' : 'calc(100% - ' + (t.r[1] - pad - 14) + 'px)', step: String(i) };
+      })(),
       coffeeReady: true, coffeeLeft: 3 - s.coffeeUsed,
       hasThought: !!s.thought, thought: s.thought ? s.thought.t : '', thoughtTitle: s.thought ? s.thought.title : '', thoughtFoot: s.thought ? s.thought.foot : '',
       closeThought: function () { self.setState({ thought: null }); },

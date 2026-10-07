@@ -36,7 +36,7 @@
       }
 
       // «Назад» Telegram ведёт на шаг назад внутри дела: сначала закрывает окна, потом в папку/кабинет, из кабинета — на главную Huddle
-      var rt = null;
+      var rt = null, lastSpot = null;
       function goBack() {
         if (!rt) { location.href = 'index.html'; return; }
         var c = rt.comp, s = c.state, v = c.renderVals();
@@ -91,7 +91,13 @@
           }
         },
         extraVals: function () { return { isDev: params.get('dev') === '1' }; },
-        afterRender: function (comp) { fit(); save(comp); }
+        afterRender: function (comp) {
+          fit(); save(comp);
+          // в обучении прокручиваем кабинет к подсвеченному предмету
+          var spot = stage.querySelector('[data-tour-spot]');
+          var key = spot ? spot.getAttribute('data-tour-spot') : null;
+          if (key !== lastSpot) { lastSpot = key; if (spot && spot.scrollIntoView) spot.scrollIntoView({ block: 'center' }); }
+        }
       });
     })();
   </script>
