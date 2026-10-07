@@ -94,7 +94,7 @@
         for (var k = 0; k < list.length; k++) { var sc = {}; sc[as] = list[k]; this.build(n, scopes.concat([sc]), out); }
         continue;
       }
-      var el = document.createElement(tag);
+      var el = n.namespaceURI && n.namespaceURI !== 'http://www.w3.org/1999/xhtml' ? document.createElementNS(n.namespaceURI, n.localName) : document.createElement(tag);
       for (var a = 0; a < n.attributes.length; a++) {
         var at = n.attributes[a], name = at.name.toLowerCase(), val = at.value;
         if (name.indexOf('hint-') === 0) continue;

@@ -32,7 +32,24 @@
 
       if (tg) {
         try { tg.ready(); tg.expand(); tg.setHeaderColor('#0E1013'); tg.setBackgroundColor('#0E1013'); } catch (e) {}
-        try { tg.BackButton.show(); tg.BackButton.onClick(function () { location.href = 'index.html'; }); } catch (e) {}
+        try { tg.BackButton.show(); tg.BackButton.onClick(function () { goBack(); }); } catch (e) {}
+      }
+
+      // «Назад» Telegram ведёт на шаг назад внутри дела: сначала закрывает окна, потом в папку/кабинет, из кабинета — на главную Huddle
+      var rt = null;
+      function goBack() {
+        if (!rt) { location.href = 'index.html'; return; }
+        var c = rt.comp, s = c.state, v = c.renderVals();
+        if (s.pick || s.slotPick) return v.closePick();
+        if (s.sheet) return v.closeSheet();
+        if (s.zoom) return v.closeZoom();
+        if (s.thought) return v.closeThought();
+        if (s.tour && s.screen === 'office') return v.closeTour();
+        if (s.screen === 'mat' || s.screen === 'iq') return v.toFolder();
+        if (['folder', 'board', 'timeline', 'notes', 'dima', 'report', 'done'].indexOf(s.screen) >= 0) return v.toOffice();
+        if (s.screen === 'letter') return v.toName();
+        if (s.screen === 'name') return c.go('intro');
+        location.href = 'index.html';
       }
 
       // экран дела нарисован под ширину 390 — растягиваем его на весь телефон
@@ -65,7 +82,7 @@
         try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; }
       }
 
-      DCLite.start(stage, C.template, C.Component, {
+      rt = DCLite.start(stage, C.template, C.Component, {
         beforeFirst: function (comp) {
           var saved = load();
           if (saved && saved.screen) {
