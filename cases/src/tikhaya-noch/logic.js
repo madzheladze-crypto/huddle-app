@@ -605,6 +605,7 @@ var LIZA_MSGS5 = [
   { at: 2040000, time: '6 янв · 20:45', t: 'Я сегодня впервые за неделю поспала днём.' },
   { at: 2640000, time: '6 янв · 22:30', t: 'Когда будете готовы — пишите отчёт. Я хочу услышать это от вас.' }
 ];
+var BW = 600, BH = 1000;
 var TOUR = [
   { title: 'ПАПКА ДЕЛА', r: [22, 366, 158, 143], text: 'Начните отсюда. В папке всё дело: письмо Лизы, рапорт, экспертиза, схема дома и досье на всех, кто был в доме. Читайте и нажимайте на важные фразы — они станут уликами.' },
   { title: 'ДИМА · ОПЕРАТИВНИК', r: [198, 356, 174, 145], text: 'Ваш оперативник. Попросите — пробьёт людей, достанет документы, договорится о встрече. Всё, что он найдёт, падает в папку.' },
@@ -620,7 +621,7 @@ function docsUpTo(v) { return DOCS.concat(v >= 2 ? DOCS2 : [], v >= 3 ? DOCS3 : 
 function initState() {
   var pos = {}; Object.keys(POS0).forEach(function (k) { pos[k] = { x: POS0[k][0], y: POS0[k][1] }; });
   return { screen: 'intro', name: '', mat: null, back: 'folder', opened: {}, ev: [], notes: {}, noteSeq: 0, place: {}, status: {}, sel: null, ghost: null,
-    pos: pos, fpos: {}, threads: [], threadMode: false, threadFrom: null, sheet: null, room: 'kitchen', zoom: false, thought: null, coffeeUsed: 0, lizaChat: [], lizaUnread: 0, push: null, tour: false, tourStep: 0, toured: false, fails: 0, slots: {}, slotPick: null, ending: null, pushFrom: 'liza', version: 1, iq: {}, iqOpen: null, pick: false, flags: {},
+    pos: pos, fpos: {}, threads: [], threadMode: false, threadFrom: null, sheet: null, room: 'kitchen', zoom: false, thought: null, coffeeUsed: 0, lizaChat: [], lizaUnread: 0, push: null, tour: false, tourStep: 0, boardZ: 1, toured: false, fails: 0, slots: {}, slotPick: null, ending: null, pushFrom: 'liza', version: 1, iq: {}, iqOpen: null, pick: false, flags: {},
     lupa: {}, lupaR: [], hints: 0, unlocked: {}, chat: [], asked: {}, typing: false, dimaUnread: true,
     tl: [], tlTime: '', tlText: '', draft: '', suspect: null, attach: [], result: '', nudge: '', toast: '' };
 }
@@ -813,6 +814,14 @@ class Component extends DCLogic {
     if (s.sel && byId(id)) { this.place(s.sel, id); return; }
     this.setState({ sheet: id });
   }
+  setBoardZoom(z) {
+    var old = this.state.boardZ || 1, nz = Math.max(0.4, Math.min(1.6, Math.round(z * 100) / 100));
+    if (nz === old) return;
+    var sc = document.querySelector('[data-pinch]'), cx = 0, cy = 0;
+    if (sc) { cx = (sc.scrollLeft + sc.clientWidth / 2) / old; cy = (sc.scrollTop + sc.clientHeight / 2) / old; }
+    this.setState({ boardZ: nz });
+    if (sc) setTimeout(function () { sc.scrollLeft = cx * nz - sc.clientWidth / 2; sc.scrollTop = cy * nz - sc.clientHeight / 2; }, 30);
+  }
   dragStart(kind, id, e) {
     if (e && e.button) return;
     var root = document.querySelector('[data-root]');
@@ -828,7 +837,8 @@ class Component extends DCLogic {
     d.moved = true;
     if (d.kind === 'card' || d.kind === 'sticky') {
       var key = d.kind === 'card' ? 'pos' : 'fpos', pos = Object.assign({}, this.state[key]), patch = {};
-      pos[d.id] = { x: Math.max(0, Math.min(d.kind === 'card' ? 256 : 242, d.ox + dx * d.k)), y: Math.max(8, Math.min(560, d.oy + dy * d.k)) };
+      var zz = this.state.boardZ || 1;
+      pos[d.id] = { x: Math.max(0, Math.min(d.kind === 'card' ? BW - 110 : BW - 124, d.ox + dx * d.k / zz)), y: Math.max(8, Math.min(BH - 100, d.oy + dy * d.k / zz)) };
       patch[key] = pos; this.setState(patch);
     } else {
       this.setState({ ghost: { id: d.id, x: (e.clientX - d.r.left) * d.k, y: (e.clientY - d.r.top) * d.k }, sel: null });
@@ -846,7 +856,8 @@ class Component extends DCLogic {
     var cork = document.querySelector('[data-drop="cork"]');
     if (zid && cork) {
       var cr = cork.getBoundingClientRect();
-      this.place(d.id, 'free', { x: Math.max(0, Math.min(242, (e.clientX - cr.left) * d.k - 62)), y: Math.max(8, Math.min(560, (e.clientY - cr.top) * d.k - 14)) });
+      var bk = BW / cr.width;
+      this.place(d.id, 'free', { x: Math.max(0, Math.min(BW - 124, (e.clientX - cr.left) * bk - 62)), y: Math.max(8, Math.min(BH - 100, (e.clientY - cr.top) * bk - 14)) });
       return;
     }
     this.setState({ ghost: null });
@@ -1098,6 +1109,9 @@ class Component extends DCLogic {
         if (s.coffeeUsed >= 3) { self.setState({ thought: { title: 'КОФЕ ЗАКОНЧИЛСЯ', t: 'Третья чашка была последней. Дальше — своей головой.', foot: 'Три чашки на версию.' } }); return; }
         self.setState({ coffeeUsed: s.coffeeUsed + 1, hints: s.hints + 1, thought: { title: 'ЧАШКА ' + (s.coffeeUsed + 1) + ' ИЗ 3', t: self.thoughtNext(), foot: 'Каждая чашка засчитывается как подсказка.' } });
       },
+      boardZ: s.boardZ || 1, boardW: Math.round(BW * (s.boardZ || 1)) + 'px', boardH: Math.round(BH * (s.boardZ || 1)) + 'px', zoomLabel: Math.round((s.boardZ || 1) * 100) + '%',
+      zoomIn: function () { self.setBoardZoom((s.boardZ || 1) + 0.2); }, zoomOut: function () { self.setBoardZoom((s.boardZ || 1) - 0.2); },
+      zoomFit: function () { var sc = document.querySelector('[data-pinch]'); self.setBoardZoom(sc ? Math.min(sc.clientWidth / BW, sc.clientHeight / BH) : 0.6); },
       showTour: !!s.tour && s.screen === 'office',
       closeTour: function () { self.setState({ tour: false, tourStep: 0 }); },
       openTour: function () { self.setState({ tour: true, tourStep: 0 }); },

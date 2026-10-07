@@ -66,6 +66,22 @@
       window.addEventListener('resize', fit);
       if (tg && tg.onEvent) tg.onEvent('viewportChanged', fit);
 
+      // щипок двумя пальцами на доске улик — масштаб
+      var pinch = null;
+      function dist(t) { var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY; return Math.sqrt(dx * dx + dy * dy); }
+      stage.addEventListener('touchstart', function (e) {
+        if (e.touches.length === 2 && e.target.closest && e.target.closest('[data-pinch]') && rt) {
+          pinch = { d: dist(e.touches), z: rt.comp.state.boardZ || 1 };
+          rt.comp._drag = null;
+        }
+      }, { passive: true });
+      stage.addEventListener('touchmove', function (e) {
+        if (!pinch || e.touches.length !== 2) return;
+        e.preventDefault();
+        rt.comp.setBoardZoom(pinch.z * dist(e.touches) / pinch.d);
+      }, { passive: false });
+      stage.addEventListener('touchend', function (e) { if (e.touches.length < 2) pinch = null; }, { passive: true });
+
       // сохранение прогресса (на этом телефоне)
       var KEY = 'huddle:case:' + caseId;
       var SKIP = { ghost: 1, push: 1, toast: 1, typing: 1, pick: 1, slotPick: 1, pickQ: 1, thought: 1, zoom: 1, sheet: 1 };
