@@ -199,6 +199,19 @@
     h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Пары · Знакомство · Коллеги</h2>' +
       "<p>Новые наборы и уровни: лайт, с перчинкой и огонь 18+</p></div>");
     on("[data-set]", function (e) { go("setIntro", { setId: e.currentTarget.getAttribute("data-set") }); });
+    var caseKey = "huddle:case:tikhaya-noch";
+    var hasCase = false;
+    try { hasCase = !!localStorage.getItem(caseKey); } catch (e) {}
+    if (hasCase) {
+      h('<button class="link" data-reset-case>Сбросить прогресс «Тихой ночи»</button>');
+      on("[data-reset-case]", function () {
+        confirmMsg("Начать «Тихую ночь» с самого начала? Улики, доска и отчёты сотрутся.", function () {
+          try { localStorage.removeItem(caseKey); } catch (e) {}
+          go("home", {}, true);
+          alertMsg("Готово. Дело начнётся с заставки.");
+        });
+      });
+    }
   };
 
   screens.setIntro = function (p) {
