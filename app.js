@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  var BUILD = window.HUDDLE_BUILD || '1';
 
   var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
   var app = document.getElementById("app");
@@ -192,26 +193,24 @@
 
   screens.home = function () {
     h('<div class="hero"><div class="logo">Huddle</div><p class="muted">игры для своих</p></div>');
-    h('<button class="tile accent" data-set="friends-lite"><span class="tag">Бесплатно</span>' +
-      '<h2>Друзья · Лайт</h2><p>Айсберг, «Кто из нас», дебаты и ещё 5 игр для компании</p></button>');
-    h('<a class="tile" href="case.html?case=tikhaya-noch" style="text-decoration:none;color:inherit"><span class="tag dim">Детектив · тест</span><h2>Тихая ночь</h2>' +
+    h('<a class="tile" href="case.html?case=tikhaya-noch&v=' + BUILD + '" style="text-decoration:none;color:inherit"><span class="tag dim">Детектив · тест</span><h2>Тихая ночь</h2>' +
       "<p>Новогодняя ночь, загородный дом под Петербургом. Полиция говорит — несчастный случай. Сестра погибшего так не думает.</p></a>");
-    h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Пары · Знакомство · Коллеги</h2>' +
-      "<p>Новые наборы и уровни: лайт, с перчинкой и огонь 18+</p></div>");
-    on("[data-set]", function (e) { go("setIntro", { setId: e.currentTarget.getAttribute("data-set") }); });
     var caseKey = "huddle:case:tikhaya-noch";
     var hasCase = false;
     try { hasCase = !!localStorage.getItem(caseKey); } catch (e) {}
-    if (hasCase) {
-      h('<button class="link" data-reset-case>Сбросить прогресс «Тихой ночи»</button>');
-      on("[data-reset-case]", function () {
-        confirmMsg("Начать «Тихую ночь» с самого начала? Улики, доска и отчёты сотрутся.", function () {
-          try { localStorage.removeItem(caseKey); } catch (e) {}
-          go("home", {}, true);
-          alertMsg("Готово. Дело начнётся с заставки.");
-        });
+    if (hasCase) h('<button class="link" data-reset-case style="margin:-4px auto 14px">Сбросить прогресс «Тихой ночи»</button>');
+    h('<button class="tile accent" data-set="friends-lite"><span class="tag">Бесплатно</span>' +
+      '<h2>Друзья · Лайт</h2><p>Айсберг, «Кто из нас», дебаты и ещё 5 игр для компании</p></button>');
+    h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Пары · Знакомство · Коллеги</h2>' +
+      "<p>Новые наборы и уровни: лайт, с перчинкой и огонь 18+</p></div>");
+    on("[data-set]", function (e) { go("setIntro", { setId: e.currentTarget.getAttribute("data-set") }); });
+    if (hasCase) on("[data-reset-case]", function () {
+      confirmMsg("Начать «Тихую ночь» с самого начала? Улики, доска и отчёты сотрутся.", function () {
+        try { localStorage.removeItem(caseKey); } catch (e) {}
+        go("home", {}, true);
+        alertMsg("Готово. Дело начнётся с заставки.");
       });
-    }
+    });
   };
 
   screens.setIntro = function (p) {

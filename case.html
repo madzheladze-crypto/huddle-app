@@ -14,12 +14,13 @@
 </head>
 <body>
   <div id="stage"></div>
-  <script src="cases/dc-lite.js"></script>
   <script>
-    // какое дело открыть: case.html?case=tikhaya-noch
+    // какое дело открыть: case.html?case=tikhaya-noch (v — номер сборки, чтобы не брать старые файлы из кэша)
     var params = new URLSearchParams(location.search);
     var caseId = params.get('case') || 'tikhaya-noch';
-    document.write('<script src="cases/' + caseId.replace(/[^a-z0-9-]/g, '') + '.js"><\/script>');
+    var ver = (params.get('v') || '1').replace(/[^0-9a-z-]/gi, '');
+    document.write('<script src="cases/dc-lite.js?v=' + ver + '"><\/script>');
+    document.write('<script src="cases/' + caseId.replace(/[^a-z0-9-]/g, '') + '.js?v=' + ver + '"><\/script>');
   </script>
   <script>
     (function () {
