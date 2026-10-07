@@ -838,7 +838,7 @@ class Component extends DCLogic {
     if (d.kind === 'card' || d.kind === 'sticky') {
       var key = d.kind === 'card' ? 'pos' : 'fpos', pos = Object.assign({}, this.state[key]), patch = {};
       var zz = this.state.boardZ || 1;
-      pos[d.id] = { x: Math.max(0, Math.min(d.kind === 'card' ? BW - 110 : BW - 124, d.ox + dx * d.k / zz)), y: Math.max(8, Math.min(BH - 100, d.oy + dy * d.k / zz)) };
+      pos[d.id] = { x: Math.max(0, Math.min(d.kind === 'card' ? this._bw - 110 : this._bw - 124, d.ox + dx * d.k / zz)), y: Math.max(8, Math.min(this._bh - 100, d.oy + dy * d.k / zz)) };
       patch[key] = pos; this.setState(patch);
     } else {
       this.setState({ ghost: { id: d.id, x: (e.clientX - d.r.left) * d.k, y: (e.clientY - d.r.top) * d.k }, sel: null });
@@ -856,8 +856,8 @@ class Component extends DCLogic {
     var cork = document.querySelector('[data-drop="cork"]');
     if (zid && cork) {
       var cr = cork.getBoundingClientRect();
-      var bk = BW / cr.width;
-      this.place(d.id, 'free', { x: Math.max(0, Math.min(BW - 124, (e.clientX - cr.left) * bk - 62)), y: Math.max(8, Math.min(BH - 100, (e.clientY - cr.top) * bk - 14)) });
+      var bk = this._bw / cr.width;
+      this.place(d.id, 'free', { x: Math.max(0, Math.min(this._bw - 124, (e.clientX - cr.left) * bk - 62)), y: Math.max(8, Math.min(this._bh - 100, (e.clientY - cr.top) * bk - 14)) });
       return;
     }
     this.setState({ ghost: null });
@@ -870,6 +870,10 @@ class Component extends DCLogic {
     this.flash('Заметка на доске');
   }
   renderVals() {
+    // при уменьшении доска растягивается на весь экран, чтобы карточки можно было тащить до края
+    var zb = this.state.boardZ || 1, scEl = typeof document !== 'undefined' ? document.querySelector('[data-pinch]') : null;
+    this._bw = Math.max(BW, Math.ceil((scEl ? scEl.clientWidth : 366) / zb));
+    this._bh = Math.max(BH, Math.ceil((scEl ? scEl.clientHeight : 500) / zb));
     var s = this.state, self = this;
     var name = (s.name || '').trim();
     var stop = function (e) { if (e && e.stopPropagation) e.stopPropagation(); };
@@ -1109,7 +1113,7 @@ class Component extends DCLogic {
         if (s.coffeeUsed >= 3) { self.setState({ thought: { title: 'КОФЕ ЗАКОНЧИЛСЯ', t: 'Третья чашка была последней. Дальше — своей головой.', foot: 'Три чашки на версию.' } }); return; }
         self.setState({ coffeeUsed: s.coffeeUsed + 1, hints: s.hints + 1, thought: { title: 'ЧАШКА ' + (s.coffeeUsed + 1) + ' ИЗ 3', t: self.thoughtNext(), foot: 'Каждая чашка засчитывается как подсказка.' } });
       },
-      boardZ: s.boardZ || 1, boardW: Math.round(BW * (s.boardZ || 1)) + 'px', boardH: Math.round(BH * (s.boardZ || 1)) + 'px', zoomLabel: Math.round((s.boardZ || 1) * 100) + '%',
+      boardZ: zb, boardW: Math.round(this._bw * zb) + 'px', boardH: Math.round(this._bh * zb) + 'px', corkW: this._bw + 'px', corkH: this._bh + 'px', zoomLabel: Math.round((s.boardZ || 1) * 100) + '%',
       zoomIn: function () { self.setBoardZoom((s.boardZ || 1) + 0.2); }, zoomOut: function () { self.setBoardZoom((s.boardZ || 1) - 0.2); },
       zoomFit: function () { var sc = document.querySelector('[data-pinch]'); self.setBoardZoom(sc ? Math.min(sc.clientWidth / BW, sc.clientHeight / BH) : 0.6); },
       showTour: !!s.tour && s.screen === 'office',

@@ -349,7 +349,7 @@
 </div>
 <div class="cork" data-pinch="1" style="flex: 1; overflow: auto; box-shadow: inset 0 6px 14px rgba(0,0,0,.4)">
 <div style="position: relative; width: {{ boardW }}; height: {{ boardH }}">
-<div data-drop="cork" style="position: absolute; left: 0; top: 0; width: 600px; height: 1000px; transform: scale({{ boardZ }}); transform-origin: 0 0">
+<div data-drop="cork" style="position: absolute; left: 0; top: 0; width: {{ corkW }}; height: {{ corkH }}; transform: scale({{ boardZ }}); transform-origin: 0 0">
 <sc-for list="{{ stickies }}" as="n" hint-placeholder-count="0">
 <div class="{{ n.cls }}" data-drop="{{ n.id }}" style="left: {{ n.x }}; top: {{ n.y }}; background: {{ n.bg }}; transform: rotate({{ n.rot }})" onPointerDown="{{ n.down }}" onClick="{{ n.tap }}">
 <div style="position: absolute; top: -5px; left: 50%; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #E2574A, #8A2017); box-shadow: 0 2px 3px rgba(0,0,0,.5)"></div>
