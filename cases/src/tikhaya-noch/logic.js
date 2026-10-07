@@ -605,6 +605,51 @@ var LIZA_MSGS5 = [
   { at: 2040000, time: '6 янв · 20:45', t: 'Я сегодня впервые за неделю поспала днём.' },
   { at: 2640000, time: '6 янв · 22:30', t: 'Когда будете готовы — пишите отчёт. Я хочу услышать это от вас.' }
 ];
+// Короткие названия улик: показываются на доске и в выборе улики. Полный текст — по нажатию.
+var SHORT = {
+  never: 'Брат не принимал снотворное', terrace: 'Нашли в кресле на террасе', phone: 'Телефон — на столе в кабинете',
+  dose: 'В крови три таблетки', twice: 'Снотворное в два приёма', window: 'Смерть между 23:00 и 01:00',
+  kirill: 'Кирилл: «Ты ещё пожалеешь»', jacket: '«Вика» в белой куртке у кресла', onlyjacket: 'Белая куртка такая одна',
+  view: 'Окно кухни смотрит на кресло', dark: 'До кресла 15 м, горит гирлянда', nosee: 'Из бани террасу не видно',
+  nobody: 'Посторонних в доме не было', insur: 'Страховка — на Вику', pills: 'Снотворное — по рецепту Вики',
+  vikamoney: 'У Вики своих денег нет', torn: 'Две ячейки выдавлены с надрывом', vikasays: 'Вика: «весь вечер в гостиной»',
+  vikanoterrace: 'Вика: «к креслу не подходила»', bagopen: 'Сумка Вики висела открытой', notvikatorn: 'Вика: «выдавливаю аккуратно»',
+  vikano: 'Вика: «не давала снотворное»', onepill: 'Вика: одна таблетка в чай', vikanopass: 'Вика не знала пароль',
+  leaving: 'Вика собиралась уходить', prenup: 'Брачный договор', cork: 'Нина глянула в окно на хлопок пробки',
+  hood: 'Капюшон на глаза, наклонилась к нему', noface: 'Нина не видела лица', audit: 'Ссора Максима и Дениса: «аудит»',
+  pledy: 'Пледы всегда в прихожей', appraisers: 'Максим водил «оценщиков»', sleeves: 'Рукава до пальцев, подол болтается',
+  vela: 'Лиза увела у брата фонд', denislaptop: 'Денис: «сидел за его ноутбуком»', denisdeleted: 'Денис удалил письма Глеба',
+  denisadmit: 'Денис: «Глеб — брат Марины»', denisdeny: 'Денис: «про выплаты знали многие»', denisblack: 'Денис признал шантаж',
+  denisconf: 'Денис: «мёртвый не заплатит»', denissays: 'Денис: «звонил Глебу»', lizaalibi: 'Лиза: «ходила в гостевой домик»',
+  lizalie1: 'Лиза: «не дошла, стояла на крыльце»', lizanopass: 'Лиза: «пароля не знаю»', lizapasslie: 'Лиза: «мог сто раз поменять»',
+  lizacheck: 'Лиза: «спит в кабинете»', lizadark: 'Лиза: «было темно, свет не включала»', lizaknew: 'Лиза знала про дом и банк',
+  gate: 'Кирилл у ворот', jackets: 'Белая куртка в прихожей одна', lizabag: 'Лиза у открытой сумки Вики',
+  tea: 'Вика несёт Максиму чай', lizaglasses: 'Лиза несёт два стакана виски', vikaroom: 'Вика открывает шампанское в гостиной',
+  lizapledy: 'Лиза с пледами в сухих балетках', taxiarr: 'Такси Кирилла у дома', notinside: 'Кирилл: «в дом не заходил»',
+  whosigned: 'Кирилл: «проверьте, кто подписывал»', denissmoke: 'Денис: «курил на крыльце»', breath: 'Максим: «пойду подышу»',
+  lizawent: 'Лиза уходит за пледами', deleted: 'Марина удаляла фото', post0015: 'Пост Максима вышел в 00:15',
+  cleansnow: 'В посте снег без следов', silence: 'В посте тишина, без салюта', snowstop: 'Снег кончился до 22:00',
+  call: 'Лиза: «Макс на созвоне»', vikaback: 'Вика возвращается во двор', boom: 'Во дворе гремит салют',
+  dontouch: 'Лиза: «не трогайте его»', tracks: 'На склоне следы', maxwalk: 'Следы — Максима',
+  shot2205: 'Видео снято в 22:05', unread: 'Вика: «ты где?» — не прочитано', lizasaid: 'Лиза всем: «уснул в кабинете»',
+  housedeal: 'Сделка по дому 3 января', created2341: 'Пост поставлен в 23:41', crash: 'ДТП на КАДе с машиной Monza',
+  oldstory: 'Максим: «закрываю старую историю»', lizanotoast: 'Лиза не подняла бокал', knows18: 'Шантажист знает про 18 млн',
+  blackmail: 'Шантаж: 200 млн до 5 января', kirillsign: 'Кирилл: «спроси, кто подписывает»', officewifi: 'Письмо ушло из офиса Monza',
+  officepass: 'В офисе был только Корнеев', notes900: 'Максим: 900 млн подрядчику?!', housenote: 'Максим продаёт дом за 350 млн',
+  tsnord: '912 млн — ТехСервис Норд', eighteen: '18 млн семье погибшего подписал Корнеев', tsnordsavin: 'ТехСервис Норд — на Савине',
+  zalivsavin: 'Залив Эстейт — на Савине', savinbro: 'Савин — брат Марины', laptopsavin: 'Фото: Денис чистит почту Максима',
+  deniscall: 'Денис 13 минут говорит с Савиным', pass7: 'Пароль — мамин день рождения (пост Лизы)', terracephoto: 'Мама снимала их на террасе',
+  bankletter: 'Лиза — поручитель на 1,1 млрд', lumen: 'Банк заберёт долю Лизы в Lumen', willdraft: 'Мама хотела дом обоим',
+  willmax: 'Дом завещан Максиму', housesearch: 'Лиза искала «Залив Эстейт»', search: 'Лиза искала «недостойный наследник»',
+  jacketfit: 'В куртке был кто-то не выше 160 см', heights: 'Рост: Марина 172, Нина 165, Лиза 158', height178: 'Рост Вики — 178'
+};
+function verOfMat(m) { if (DOCS.indexOf(m) >= 0 || DOSS.indexOf(m) >= 0) return 1; if (DOCS2.indexOf(m) >= 0 || m === 'q_vika' || m === 'q_nina') return 2; if (DOCS3.indexOf(m) >= 0) return 3; if (DOCS4.indexOf(m) >= 0 || m === 'q_denis') return 4; if (DOCS5.indexOf(m) >= 0 || m === 'q_liza') return 5; return 1; }
+function shortOf(f) {
+  var t = (f.c && SHORT[f.c]) || f.tl;
+  if (!t) { var w = clean(f.t).split(' '); t = w.slice(0, 6).join(' ') + (w.length > 6 ? '…' : ''); }
+  if (f.time && t.indexOf(f.time) < 0) t += ' · ' + f.time;
+  return t;
+}
 var BW = 600, BH = 1000;
 var TOUR = [
   { title: 'ПАПКА ДЕЛА', r: [22, 366, 158, 143], text: 'Начните отсюда. В папке всё дело: письмо Лизы, рапорт, экспертиза, схема дома и досье на всех, кто был в доме. Читайте и нажимайте на важные фразы — они станут уликами.' },
@@ -728,7 +773,7 @@ class Component extends DCLogic {
     this._lizaStarted = true;
     lizaFor(v).forEach(function (m) { if (s.lizaChat.some(function (x) { return x.t === m.t; })) return; setTimeout(function () { if (self.state.version === v) self.lizaSays(m); }, m.at); });
   }
-  nodeName(id) { var b = byId(id); return b ? b.name : shortT(this.item(id).text); }
+  nodeName(id) { var b = byId(id); return b ? b.name : shortT(this.item(id).short); }
   nodePos(id) { var s = this.state; if (s.pos[id]) return { x: s.pos[id].x + 55, y: s.pos[id].y + 1 }; var f = s.fpos[id]; return f ? { x: f.x + 62, y: f.y + 1 } : null; }
   thoughtNext() {
     var s = this.state, got = function (k) { return s.ev.some(function (id) { return FRAG[id] && FRAG[id].c === k; }); };
@@ -788,8 +833,9 @@ class Component extends DCLogic {
   }
   item(id) {
     var s = this.state;
-    if (FRAG[id]) { var f = FRAG[id]; return { id: id, text: clean(f.t), src: MATS[f.mat].title, key: f.c, time: f.time, tl: f.tl, note: false }; }
-    return { id: id, text: s.notes[id] || '', src: 'Заметка', note: true };
+    if (FRAG[id]) { var f = FRAG[id]; return { id: id, text: clean(f.t), short: shortOf(f), ver: verOfMat(f.mat), src: MATS[f.mat].title, key: f.c, time: f.time, tl: f.tl, note: false }; }
+    var nt = s.notes[id] || '';
+    return { id: id, text: nt, short: nt, ver: 0, src: 'Заметка', note: true };
   }
   place(id, zone, xy) {
     var s = this.state, p = Object.assign({}, s.place), fp = Object.assign({}, s.fpos);
@@ -932,7 +978,7 @@ class Component extends DCLogic {
     });
     var stickies = items.filter(function (it) { return s.place[it.id] === 'free' && s.fpos[it.id]; }).map(function (it, i) {
       var f = s.fpos[it.id];
-      return { id: it.id, text: it.text, x: f.x + 'px', y: f.y + 'px', rot: (i % 2 ? '2deg' : '-2deg'), bg: it.note ? '#F4D35E' : '#F3EEE3',
+      return { id: it.id, text: it.short, x: f.x + 'px', y: f.y + 'px', rot: (i % 2 ? '2deg' : '-2deg'), bg: it.note ? '#F4D35E' : '#F3EEE3',
         cls: 'sticky' + (s.threadFrom === it.id ? ' from' : (s.threadMode && s.threadFrom ? ' hot' : '')),
         down: function (e) { self.dragStart('sticky', it.id, e); }, tap: function (e) { stop(e); self.cardTap(it.id); } };
     });
@@ -943,18 +989,18 @@ class Component extends DCLogic {
     });
     var tray = unplacedItems.map(function (it) {
       var dragging = s.ghost && s.ghost.id === it.id;
-      return { text: it.text, src: it.src, op: dragging ? 0.3 : 1,
+      return { text: it.short, src: it.src, op: dragging ? 0.3 : 1,
         cls: 'chip' + (it.note ? ' note' : '') + (s.sel === it.id ? ' sel' : ''),
         down: function (e) { self.dragStart('ev', it.id, e); },
         tap: function (e) { stop(e); if (self._suppress) return; self.setState({ sel: s.sel === it.id ? null : it.id, threadMode: false, threadFrom: null }); } };
     });
     var ghost = null;
-    if (s.ghost) { var gi = self.item(s.ghost.id); ghost = { x: s.ghost.x + 'px', y: s.ghost.y + 'px', text: gi.text, bg: gi.note ? '#F4D35E' : '#EDE6D8' }; }
+    if (s.ghost) { var gi = self.item(s.ghost.id); ghost = { x: s.ghost.x + 'px', y: s.ghost.y + 'px', text: gi.short, bg: gi.note ? '#F4D35E' : '#EDE6D8' }; }
     var sheet = null;
     if (s.sheet && !byId(s.sheet)) {
       var SI = self.item(s.sheet), sid2 = s.sheet;
       var th2 = s.threads.filter(function (k) { return k.split('|').indexOf(sid2) >= 0; });
-      sheet = { name: SI.note ? 'Заметка' : 'Улика', role: SI.src, hasStatus: false, hasDossier: false, isCard: false, hasText: true, text: SI.text, textBg: SI.note ? '#F4D35E' : '#EDE6D8',
+      sheet = { name: SI.note ? 'Заметка' : SI.short, role: SI.src, hasStatus: false, hasDossier: false, isCard: false, hasText: true, text: SI.text, textBg: SI.note ? '#F4D35E' : '#EDE6D8',
         unpin: function () { self.place(sid2, 'tray'); }, stats: [], count: 0, empty: false, items: [],
         hasThreads: th2.length > 0, threads: th2.map(function (k) { var other = k.split('|').filter(function (x) { return x !== sid2; })[0]; return { name: self.nodeName(other),
           cut: function () { self.setState({ threads: s.threads.filter(function (x) { return x !== k; }) }); self.flash('Нитка разрезана'); } }; }) };
@@ -966,7 +1012,7 @@ class Component extends DCLogic {
         stats: STATUS.map(function (st, i) { var on = i === cur; return { label: st.label, border: on ? st.color : '#3A3F47', bg: on ? st.color : 'transparent', fg: on ? '#fff' : '#E9E3D6',
           pick: function () { var o = Object.assign({}, s.status); o[sid] = i; self.setState({ status: o }); } }; }),
         count: pinned.length, empty: pinned.length === 0,
-        items: pinned.map(function (it) { return { text: it.text, src: it.src, bg: it.note ? '#F4D35E' : '#EDE6D8', back: function () { self.place(it.id, 'tray'); } }; }),
+        items: pinned.map(function (it) { return { text: it.short, src: it.src, bg: it.note ? '#F4D35E' : '#EDE6D8', back: function () { self.place(it.id, 'tray'); } }; }),
         hasThreads: th.length > 0,
         threads: th.map(function (k) { var other = k.split('|').filter(function (x) { return x !== sid; })[0]; return { name: self.nodeName(other),
           cut: function () { self.setState({ threads: s.threads.filter(function (x) { return x !== k; }) }); self.flash('Нитка разрезана'); } }; }),
@@ -1040,7 +1086,7 @@ class Component extends DCLogic {
     var iqv = { bg: '#333', ini: '', full: '', role: '', intro: '', log: [], qs: [], hasQs: false, hint: function () {}, present: function () {}, presentText: '', presentBg: '', presentFg: '' };
     var spec = [null, SPEC1, SPEC2, SPEC3, SPEC4, SPEC5][s.version];
     var slots = spec.map(function (sp) { var id = s.slots[sp.id], it = id ? self.item(id) : null;
-      return { label: sp.label, text: it ? it.text : 'Выбрать улику  +', src: it ? it.src : 'нажмите, чтобы выбрать с доски', mark: it ? 'ЗАМЕНИТЬ' : '', bc: it ? '#D9A441' : '#3A3F47', bs: it ? 'solid' : 'dashed',
+      return { label: sp.label, text: it ? it.short : 'Выбрать улику  +', src: it ? it.src : 'нажмите, чтобы выбрать с доски', mark: it ? 'ЗАМЕНИТЬ' : '', bc: it ? '#D9A441' : '#3A3F47', bs: it ? 'solid' : 'dashed',
         open: function () { self.setState({ slotPick: sp.id, pickQ: '' }); } }; });
     var cardOf = function (it) { var z = s.place[it.id]; if (z && z !== 'free') return z;
       if (z === 'free') { var t = s.threads.filter(function (k) { return k.split('|').indexOf(it.id) >= 0; })[0]; if (t) { var o = t.split('|').filter(function (x) { return x !== it.id; })[0]; if (BOARD.some(function (b) { return b.id === o; })) return o; } }
@@ -1048,18 +1094,27 @@ class Component extends DCLogic {
     var bname = function (id) { var b = BOARD.filter(function (x) { return x.id === id; })[0]; return b ? b.name : id; };
     var grouped = function (first, mk) {
       var qq = (s.pickQ || '').trim().toLowerCase();
-      var list = items.filter(function (it) { return !it.note && (!qq || (it.text + ' ' + it.src).toLowerCase().indexOf(qq) >= 0); }), out = [], used = {};
-      var push = function (head, arr) { if (!arr.length) return; out.push({ isHead: true, isItem: false, head: head, label: '', src: '', go: function () {} }); arr.forEach(function (it) { used[it.id] = 1; var r = mk(it); r.isHead = false; r.isItem = true; r.head = ''; out.push(r); }); };
-      first.forEach(function (bid) { push('На доске · ' + bname(bid), list.filter(function (it) { return !used[it.id] && cardOf(it) === bid; })); });
-      push('Остальное на доске', list.filter(function (it) { return !used[it.id] && s.place[it.id]; }));
-      push('Ещё не на доске', list.filter(function (it) { return !used[it.id]; }));
+      var list = items.filter(function (it) { return !it.note && (!qq || (it.short + ' ' + it.text + ' ' + it.src).toLowerCase().indexOf(qq) >= 0); }), out = [], used = {};
+      var head = function (t, open, tog) { out.push({ isHead: true, isItem: false, head: t, arrow: tog ? (open ? '▾' : '▸') : '', toggle: tog || function () {}, label: '', src: '', full: '', go: function () {} }); };
+      var add = function (arr) { arr.forEach(function (it) { used[it.id] = 1; var r = mk(it); r.isHead = false; r.isItem = true; r.head = ''; r.arrow = ''; r.toggle = function () {}; r.full = it.short !== it.text ? it.text : ''; out.push(r); }); };
+      first.forEach(function (bid) { var arr = list.filter(function (it) { return cardOf(it) === bid; }); if (arr.length) { head('На доске · ' + bname(bid), true, null); add(arr); } });
+      for (var v = s.version; v >= 1; v--) {
+        (function (v) {
+          var arr = list.filter(function (it) { return !used[it.id] && it.ver === v; });
+          if (!arr.length) return;
+          var open = v === s.version || !!qq || !!(s.pickOpen && s.pickOpen[v]);
+          var tog = v === s.version ? null : function () { var po = Object.assign({}, s.pickOpen); po[v] = !po[v]; self.setState({ pickOpen: po }); };
+          head((v === s.version ? 'Эта версия' : 'Версия ' + v) + ' · ' + arr.length, open, tog);
+          if (open) add(arr);
+        })(v);
+      }
       return out; };
     var pickList = [], pickOn = '';
     if (s.slotPick) {
       var spx = spec.filter(function (x) { return x.id === s.slotPick; })[0];
       pickOn = spx ? spx.label : '';
       var firstR = s.version >= 4 ? ((s.suspect ? [s.suspect] : []).concat(['facts'])) : s.version >= 3 ? ['facts', 'max'] : s.version >= 2 ? (s.slotPick === 'where' ? ['nina', 'vika', 'facts'] : ['vika', 'facts']) : ((s.suspect && s.suspect !== 'accident') ? [s.suspect, 'facts'] : ['facts']);
-      pickList = grouped(firstR, function (it) { return { label: it.text, src: it.src, go: function () { var sl = Object.assign({}, s.slots); sl[s.slotPick] = it.id; self.setState({ slots: sl, slotPick: null, result: '', nudge: '' }); } }; });
+      pickList = grouped(firstR, function (it) { return { label: it.short, src: it.src, go: function () { var sl = Object.assign({}, s.slots); sl[s.slotPick] = it.id; self.setState({ slots: sl, slotPick: null, result: '', nudge: '' }); } }; });
     }
     if (s.iqOpen) {
       var Qd = IQ[s.iqOpen], stq = self.iqState(s.iqOpen), cur = self.iqCurrent(s.iqOpen);
@@ -1083,7 +1138,7 @@ class Component extends DCLogic {
         var c2 = self.iqCurrent(s.iqOpen), t;
         if (c2) {
           var ready = items.filter(function (it) { return it.key && c2.st.accept.indexOf(it.key) >= 0; })[0];
-          t = ready ? 'У вас на доске уже есть, чем ответить на эти слова. Нажмите «Предъявить улику» и выберите: «' + (ready.text.length > 70 ? ready.text.slice(0, 68) + '…' : ready.text) + '».' : c2.st.where;
+          t = ready ? 'У вас на доске уже есть, чем ответить на эти слова. Нажмите «Предъявить улику» и выберите: «' + ready.short + '».' : c2.st.where;
         } else {
           var nx = Qd.qs.filter(function (q) { return !stq.asked[q.id] && q.st && self.qOn(q); })[0], ag = again[0];
           t = nx ? 'Спросите: «' + nx.q + '» — на этот ответ будет что предъявить.' : (ag ? 'Вернитесь к вопросу «' + ag.q + '» — на её ответ есть что предъявить.' : 'Здесь вы выяснили всё, что можно. Возвращайтесь к делу.');
@@ -1095,7 +1150,7 @@ class Component extends DCLogic {
         presentText: cur ? 'Предъявить улику на эти слова' : 'Предъявить улику', presentBg: cur ? '#D9A441' : '#2A2E35', presentFg: cur ? '#16120A' : '#8E887C',
         present: function () { if (!self.iqCurrent(s.iqOpen)) { self.flash('Сначала задайте вопрос — улику предъявляют на конкретные слова.'); return; } self.setState({ pick: true, pickQ: '' }); } };
       if (cur) { pickOn = cur.a.map(function (f) { return f.t; }).join('').replace(/^—\s*/, '').slice(0, 90); }
-      if (!s.slotPick) pickList = grouped([s.iqOpen], function (it) { return { label: it.text, src: it.src, go: function () { self.iqPresent(it.id); } }; });
+      if (!s.slotPick) pickList = grouped([s.iqOpen], function (it) { return { label: it.short, src: it.src, go: function () { self.iqPresent(it.id); } }; });
     }
 
     return {

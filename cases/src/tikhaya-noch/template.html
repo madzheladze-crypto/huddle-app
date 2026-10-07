@@ -612,8 +612,8 @@
 <sc-if value="{{ hasManyPick }}" hint-placeholder-val="{{ true }}"><input class="field" placeholder="Поиск: слово, имя или время" value="{{ pickQ }}" onInput="{{ setPickQ }}" style="min-height: 44px; flex: none"></sc-if>
 <sc-if value="{{ pickEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size: 14px; color: #8E887C">{{ pickEmptyText }}</div></sc-if>
 <sc-for list="{{ pickList }}" as="a" hint-placeholder-count="3">
-<sc-if value="{{ a.isHead }}" hint-placeholder-val="{{ false }}"><div style="font: 600 11px/1 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #D9A441; padding: 8px 2px 0">{{ a.head }}</div></sc-if>
-<sc-if value="{{ a.isItem }}" hint-placeholder-val="{{ true }}"><button class="row" style="min-height: 52px" onClick="{{ a.go }}"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 13px; line-height: 1.4">{{ a.label }}</span><span style="font-size: 11px; color: #8E887C">{{ a.src }}</span></span></button></sc-if>
+<sc-if value="{{ a.isHead }}" hint-placeholder-val="{{ false }}"><div style="display: flex; justify-content: space-between; font: 600 11px/1 'IBM Plex Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #D9A441; padding: 10px 2px 2px; cursor: pointer" onClick="{{ a.toggle }}"><span>{{ a.head }}</span><span>{{ a.arrow }}</span></div></sc-if>
+<sc-if value="{{ a.isItem }}" hint-placeholder-val="{{ true }}"><button class="row" style="min-height: 52px" onClick="{{ a.go }}"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 14px; font-weight: 600; line-height: 1.35">{{ a.label }}</span><span style="font-size: 12px; line-height: 1.4; color: #A9A397; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{ a.full }}</span><span style="font-size: 11px; color: #6B665C">{{ a.src }}</span></span></button></sc-if>
 </sc-for>
 </div>
 </sc-if>
