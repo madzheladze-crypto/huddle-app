@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Huddle · Детектив</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0E1013; overflow: hidden; overscroll-behavior: none; }
+    #stage { position: absolute; top: 0; left: 0; width: 390px; transform-origin: 0 0; }
+    #stage [data-root] { touch-action: manipulation; }
+    #stage [data-drop="cork"] { touch-action: none; }
+  </style>
+</head>
+<body>
+  <div id="stage"></div>
+  <script src="cases/dc-lite.js"></script>
+  <script>
+    // какое дело открыть: case.html?case=tikhaya-noch
+    var params = new URLSearchParams(location.search);
+    var caseId = params.get('case') || 'tikhaya-noch';
+    document.write('<script src="cases/' + caseId.replace(/[^a-z0-9-]/g, '') + '.js"><\/script>');
+  </script>
+  <script>
+    (function () {
+      var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      var C = window.HUDDLE_CASES && window.HUDDLE_CASES[caseId];
+      var stage = document.getElementById('stage');
+      if (!C) { stage.innerHTML = '<p style="color:#E9E3D6;font:16px sans-serif;padding:24px">Дело не найдено.</p>'; return; }
+      document.head.insertAdjacentHTML('beforeend', C.head);
+
+      if (tg) {
+        try { tg.ready(); tg.expand(); tg.setHeaderColor('#0E1013'); tg.setBackgroundColor('#0E1013'); } catch (e) {}
+        try { tg.BackButton.show(); tg.BackButton.onClick(function () { location.href = 'index.html'; }); } catch (e) {}
+      }
+
+      // экран дела нарисован под ширину 390 — растягиваем его на весь телефон
+      function fit() {
+        var w = window.innerWidth, h = window.innerHeight;
+        var k = Math.min(w / 390, 1.25);
+        stage.style.transform = 'scale(' + k + ')';
+        stage.style.left = Math.max(0, (w - 390 * k) / 2) + 'px';
+        var root = stage.querySelector('[data-root]');
+        if (root) root.style.height = Math.round(h / k) + 'px';
+      }
+      window.addEventListener('resize', fit);
+
+      // сохранение прогресса (на этом телефоне)
+      var KEY = 'huddle:case:' + caseId;
+      var SKIP = { ghost: 1, push: 1, toast: 1, typing: 1, pick: 1, slotPick: 1, pickQ: 1, thought: 1, zoom: 1, sheet: 1 };
+      var saveT = null;
+      function save(comp) {
+        clearTimeout(saveT);
+        saveT = setTimeout(function () {
+          var out = {};
+          Object.keys(comp.state).forEach(function (k) { if (!SKIP[k]) out[k] = comp.state[k]; });
+          try { localStorage.setItem(KEY, JSON.stringify(out)); } catch (e) {}
+        }, 600);
+      }
+      function load() {
+        try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; }
+      }
+
+      DCLite.start(stage, C.template, C.Component, {
+        beforeFirst: function (comp) {
+          var saved = load();
+          if (saved && saved.screen) {
+            Object.assign(comp.state, saved, { ghost: null, push: null, toast: '', typing: false, pick: false, slotPick: null, thought: null, zoom: false, sheet: null });
+            if (comp.resumeLiza) comp.resumeLiza();
+          }
+        },
+        extraVals: function () { return { isDev: params.get('dev') === '1' }; },
+        afterRender: function (comp) { fit(); save(comp); }
+      });
+    })();
+  </script>
+</body>
+</html>

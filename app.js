@@ -194,8 +194,8 @@
     h('<div class="hero"><div class="logo">Huddle</div><p class="muted">игры для своих</p></div>');
     h('<button class="tile accent" data-set="friends-lite"><span class="tag">Бесплатно</span>' +
       '<h2>Друзья · Лайт</h2><p>Айсберг, «Кто из нас», дебаты и ещё 5 игр для компании</p></button>');
-    h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Тихая ночь</h2>' +
-      "<p>Детектив на вечер: Северогорск, 1 января. Полиция говорит — несчастный случай.</p></div>");
+    h('<a class="tile" href="case.html?case=tikhaya-noch" style="text-decoration:none;color:inherit"><span class="tag dim">Детектив · тест</span><h2>Тихая ночь</h2>' +
+      "<p>Новогодняя ночь, загородный дом под Петербургом. Полиция говорит — несчастный случай. Сестра погибшего так не думает.</p></a>");
     h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Пары · Знакомство · Коллеги</h2>' +
       "<p>Новые наборы и уровни: лайт, с перчинкой и огонь 18+</p></div>");
     on("[data-set]", function (e) { go("setIntro", { setId: e.currentTarget.getAttribute("data-set") }); });
