@@ -201,6 +201,8 @@
     if (hasCase) h('<button class="link" data-reset-case style="margin:-4px auto 14px">Сбросить прогресс «Тихой ночи»</button>');
     h('<button class="tile accent" data-set="friends-lite"><span class="tag">Бесплатно</span>' +
       '<h2>Друзья · Лайт</h2><p>Айсберг, «Кто из нас», дебаты и ещё 5 игр для компании</p></button>');
+    h('<button class="tile" data-set="friends-hot"><span class="tag">18+</span>' +
+      '<h2>Близкие друзья · Огонь</h2><p>Свидания, бывшие и секреты. Те же 8 игр — только для своих</p></button>');
     h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Пары · Знакомство · Коллеги</h2>' +
       "<p>Новые наборы и уровни: лайт, с перчинкой и огонь 18+</p></div>");
     on("[data-set]", function (e) { go("setIntro", { setId: e.currentTarget.getAttribute("data-set") }); });
