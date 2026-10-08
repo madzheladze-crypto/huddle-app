@@ -173,6 +173,7 @@ var REQS = [
   { id: 'ins', t: 'Пробить страховку Максима', ok: 'pol', ans: 'Есть. Полис на 300 млн, оформлен в прошлом году. Получатель — жена. Скинул в папку.' },
   { id: 'pills', t: 'Чьё это снотворное?', ok: 'pack', ans: 'Позвонил Вике — она сама отдала упаковку, даже не спорила. Рецепт на неё. Фото в папке.' },
   { id: 'guests', t: 'Кто был в доме той ночью', ok: 'guests', ans: 'Составил список со слов Вики и домработницы. Журнал въезда в посёлок охрана отдаёт только полиции, так что проверить не могу. Справка в папке.' },
+  { id: 'plan', t: 'Достать план дома', ok: 'plan', needOpen: 'nina', ans: 'Нашёл в архиве застройщика. Кухня, гостиная, терраса — всё видно, кто откуда что мог разглядеть. В папке.' },
   { id: 'cams', t: 'Камеры соседей', ok: null, ans: 'Посёлок за сто миллионов, а камеры только на въезде. Записи охрана отдаёт только по запросу полиции. Двор Лисиных не видно ни с одной. Пусто.' },
   { id: 'kir', t: 'Найти Кирилла Орлова', ok: null, ans: 'Живёт в Петербурге. Где был в новогоднюю ночь — пока не ясно: соцсети с 31-го молчат, трубку не берёт. Буду копать.' },
   { id: 'phone', t: 'Открыть телефон Максима', ok: null, ans: 'Телефон у Вики, отдаст только лично. И он под паролем. Это не сегодня, шеф.' },
@@ -664,7 +665,7 @@ var TOUR = [
   { title: 'КОФЕ И ПОДСКАЗКИ', r: [296, 528, 64, 64], text: 'Застряли — выпейте кофе: появится мысль, куда смотреть дальше (три чашки на версию). Есть и другие подсказки: лупа в документах, совет Димы, кнопка «Подсказка» на допросе и звонок наставнику из отчёта. Каждая подсказка засчитывается — в конце дела видно, сколько вы взяли.' }
 ];
 // что открывается само по ходу дела: письмо Лизы приносит её вложения, запись с Ниной — схему дома
-var AUTO = { rap: 'letter', exp: 'letter', nina: 'letter', plan: 'nina' };
+var AUTO = { rap: 'letter', exp: 'letter', nina: 'letter' };
 var DOSS_NEED = { d_nina: 'nina', d_kirill: 'nina', d_denis: 'guests', d_marina: 'guests' };
 function matAvail(id, s) { return !!(MATS[id].base || s.unlocked[id] || (AUTO[id] && s.opened[AUTO[id]])); }
 function dossAvail(id, s) { var n = DOSS_NEED[id]; return s.version >= 2 || !n || !!(s.opened[n] || s.unlocked[n]); }
@@ -1054,7 +1055,7 @@ class Component extends DCLogic {
     var cork = {}; for (var i = 0; i < 5; i++) cork['o' + i] = i < linked ? 1 : 0;
 
     // Дима
-    var reqs = reqsFor(s.version).filter(function (r) { return !s.asked[r.id] && (!r.need || s.unlocked[r.need]) && (!r.needFlag || s.flags[r.needFlag]); }).map(function (r) {
+    var reqs = reqsFor(s.version).filter(function (r) { return !s.asked[r.id] && (!r.need || s.unlocked[r.need]) && (!r.needFlag || s.flags[r.needFlag]) && (!r.needOpen || s.opened[r.needOpen]); }).map(function (r) {
       return { t: r.t, ask: function () {
         if (s.typing) return;
         if ((r.need && !s.unlocked[r.need]) || (r.needFlag && !s.flags[r.needFlag])) {
@@ -1224,7 +1225,7 @@ class Component extends DCLogic {
       },
       dimaHint: function () {
         if (s.typing) return;
-        var vis = reqsFor(s.version).filter(function (r) { return r.ok && !s.asked[r.id] && (!r.need || s.unlocked[r.need]) && (!r.needFlag || s.flags[r.needFlag]); })[0];
+        var vis = reqsFor(s.version).filter(function (r) { return r.ok && !s.asked[r.id] && (!r.need || s.unlocked[r.need]) && (!r.needFlag || s.flags[r.needFlag]) && (!r.needOpen || s.opened[r.needOpen]); })[0];
         var unr = docsUpTo(s.version).filter(function (dd) { return matAvail(dd, s) && !s.opened[dd]; })[0];
         var ans = unr ? 'Сначала дочитай «' + MATS[unr].title + '» — там может быть ответ.' : (vis ? 'Я бы на твоём месте начал с этого: «' + vis.t + '».' : 'По этой версии полезного больше не вижу. Думай над тем, что уже есть.');
         self.setState({ chat: s.chat.concat([{ t: 'Дим, что посоветуешь?', cls: 'bubble-out' }]), typing: true, hints: s.hints + 1 });
