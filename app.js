@@ -57,6 +57,7 @@
     if (g.type === "countdownList") return [{ key: base, items: g.rounds.map(function (_, i) { return "r" + i; }) }];
     if (g.type === "debate") return [{ key: base, items: g.topics }];
     if (g.type === "tasks") return [{ key: base, items: g.cards.map(function (c) { return c.text; }) }];
+    if (g.type === "truthDare") return [{ key: base + ":t", items: g.truth }, { key: base + ":d", items: g.dare }];
     return [{ key: base, items: g.cards }];
   }
   function progress(parts) {
@@ -387,6 +388,54 @@
   screens.cards = function (p) {
     header(p.game.title, p.game.blurb);
     deck({ cards: p.game.cards, key: p.setId + ":" + p.game.id });
+  };
+
+  // Я никогда не… — кто делал, загибает палец
+  screens.never = function (p) {
+    header(p.game.title, "Кто делал — загибает палец");
+    deck({
+      key: p.setId + ":" + p.game.id,
+      cards: p.game.cards,
+      prefix: p.game.prefix,
+      action: "3, 2, 1 — кто делал?",
+      onAction: function () { countdown("Кто делал — загибайте палец ✋"); }
+    });
+  };
+
+  // Правда или действие — ход по кругу
+  screens.truthDare = function (p) {
+    var g = p.game, base = p.setId + ":" + g.id;
+    var decks = { t: { key: base + ":t", all: g.truth, name: "Правда" }, d: { key: base + ":d", all: g.dare, name: "Действие" } };
+    decks.t.cards = orderBySeen(decks.t.key, g.truth); decks.d.cards = orderBySeen(decks.d.key, g.dare);
+    decks.t.i = 0; decks.d.i = 0;
+    var turn = 0, cur = null;
+    header(g.title, "Ход по кругу: правда или действие");
+    h('<section data-td></section>');
+    var box = app.querySelector("[data-td]");
+    function who() { return players.length ? players[turn % players.length] : ""; }
+    function take(k) {
+      var d = decks[k];
+      if (d.i >= d.cards.length) { d.cards = orderBySeen(d.key, d.all); d.i = 0; }
+      cur = { k: k, text: d.cards[d.i] }; d.i++;
+      haptic("medium"); draw();
+    }
+    function draw() {
+      var name = who();
+      if (!cur) {
+        box.innerHTML = '<div class="card"><p class="prefix">' + (name ? "Ходит" : "Выбирай") + '</p><p class="big">' + (name ? esc(name) : "Правда или действие?") + "</p></div>" +
+          '<div class="row"><button class="btn ghost" data-pick="t">Правда</button><button class="btn" data-pick="d">Действие</button></div>';
+        box.querySelectorAll("[data-pick]").forEach(function (b) { b.onclick = function () { take(b.getAttribute("data-pick")); }; });
+        return;
+      }
+      var d = decks[cur.k];
+      box.innerHTML = '<div class="card flip">' + (isSeen(d.key, cur.text) ? '<span class="seen">уже было</span>' : "") +
+        '<p class="prefix">' + esc(d.name) + (name ? " · " + esc(name) : "") + '</p><p class="big">' + esc(cur.text) + "</p></div>" +
+        '<button class="btn" data-done>' + (players.length ? "Готово — ход следующему" : "Готово") + "</button>" +
+        '<button class="btn ghost" data-other>Другая карточка</button>';
+      box.querySelector("[data-done]").onclick = function () { markSeen(d.key, cur.text); cur = null; turn++; haptic("light"); draw(); };
+      box.querySelector("[data-other]").onclick = function () { take(cur.k); };
+    }
+    draw();
   };
 
   // Выбери число
