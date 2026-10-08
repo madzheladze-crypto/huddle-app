@@ -201,9 +201,9 @@
     if (hasCase) h('<button class="link" data-reset-case style="margin:-4px auto 14px">Сбросить прогресс «Тихой ночи»</button>');
     h('<button class="tile accent" data-set="friends-lite"><span class="tag">Бесплатно</span>' +
       '<h2>Друзья · Лайт</h2><p>Айсберг, «Кто из нас», дебаты и ещё 5 игр для компании</p></button>');
-    h('<button class="tile" data-set="friends-hot"><span class="tag">18+</span>' +
+    h('<button class="tile" data-set="friends-hot"><span class="tag">Прототип · 18+</span>' +
       '<h2>Близкие друзья · Огонь</h2><p>Секреты, деньги, зависть и правда в лицо — для тех, кто давно вместе</p></button>');
-    h('<button class="tile" data-set="love-hot"><span class="tag">18+</span>' +
+    h('<button class="tile" data-set="love-hot"><span class="tag">Прототип · 18+</span>' +
       '<h2>Близкие · Про отношения</h2><p>Для друзей и подруг: свидания, бывшие, ревность и «почти было»</p></button>');
     h('<div class="tile soon"><span class="tag dim">Скоро</span><h2>Пары · Знакомство · Коллеги</h2>' +
       "<p>Новые наборы и уровни: лайт, с перчинкой и огонь 18+</p></div>");
